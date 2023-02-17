@@ -1,0 +1,75 @@
+syntax = "proto3";
+option go_package = ".";
+
+service TradingService{
+  rpc OpenPosition(OpenPositionRequest)returns(Response);
+  rpc ClosePosition(ClosePositionRequest)returns(Response);
+  rpc LowerThreshold(LowerThresholdRequest)returns(Response);
+  rpc UpperThreshold(UpperThresholdRequest)returns(Response);
+  rpc GetPositions(GetPositionsRequest)returns(GetPositionsResponse);
+}
+
+message OpenPositionRequest{
+  string userID = 1;
+  string name = 2;
+  double amount = 3;
+}
+
+message ClosePositionRequest{
+  string userID = 1;
+  string name = 2;
+  double amount = 3;
+}
+
+message LowerThresholdRequest{
+  string userID = 1;
+  string name = 2;
+  double price = 3;
+}
+
+message UpperThresholdRequest{
+  string userID = 1;
+  string name = 2;
+  double price = 3;
+}
+
+//message OpenPositionResponse{
+//  string userID = 1;
+//  string name = 2;
+//  double amount = 3;
+//}
+//
+//message ClosePositionResponse{
+//  string userID = 1;
+//  string name = 2;
+//  double amount = 3;
+//}
+//
+//message LowerThresholdResponse{
+//  string userID = 1;
+//  string name = 2;
+//  double price = 3;
+//}
+//
+//message UpperThresholdResponse{
+//  string userID = 1;
+//  string name = 2;
+//  double price = 3;
+//}
+
+message Response{
+  bool success = 1;
+}
+
+message GetPositionsRequest{
+  string userID = 1;
+}
+
+message GetPositionsResponse{
+  repeated Position data = 1;
+}
+
+message Position{
+  string name = 1;
+  double amount = 2;
+}
