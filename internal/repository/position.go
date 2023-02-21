@@ -16,8 +16,8 @@ type Position struct {
 	Pool *pgxpool.Pool
 }
 
-// NewPosition creating new Position repository
-func NewPosition(pool *pgxpool.Pool) *Position {
+// NewPositionRepository creating new Position repository
+func NewPositionRepository(pool *pgxpool.Pool) *Position {
 	return &Position{Pool: pool}
 }
 
@@ -26,8 +26,9 @@ func (r *Position) CreatePosition(ctx context.Context, position *model.Position)
 	position.Created = time.Now()
 	position.Updated = time.Now()
 	_, err := r.Pool.Exec(ctx,
-		"insert into positions (id, user, amount, lowerThreshold, upperThreshold, created, updated) values ($1, $2, $3, $4, $5, $6, $7);",
-		position.ID, position.User, position.Amount, position.LowerThreshold, position.UpperThreshold, position.Created, position.Updated)
+		`insert into positions (id, user, name, amount, stop_loss, take_profit, created, updated) values ($1, $2, $3, $4, $5, $6, $7. $8)
+			 where ;`,
+		position.ID, position.User, position.Name, position.Amount, position.StopLoss, position.TakeProfit, position.Created, position.Updated)
 	if err != nil {
 		return nil, fmt.Errorf("position - CreatePosition - Exec: %w", err)
 	}
@@ -37,17 +38,17 @@ func (r *Position) CreatePosition(ctx context.Context, position *model.Position)
 
 // GetPositionByLogin get Position by login
 func (r *Position) GetPositionByLogin(ctx context.Context, login string) (*model.Position, error) {
-	Position := model.Position{}
+	pos := model.Position{}
 	err := r.Pool.QueryRow(ctx, `select u.id, u.name, u.age, u.login, u.password, u.token, u.email, r.name
-									from Positions u
+									from positions u
 											 join roles r on r.id = u.role
 									where u.login = $1 and u.deleted=false`, login).Scan(
-		&Position.ID, &Position.Name, &Position.Age, &Position.Login, &Position.Password, &Position.Token, &Position.Email, &Position.Role)
+		&pos.ID, &pos.Name, &pos.Age, &pos.Login, &pos.Password, &pos.Token, &pos.Email, &pos.Role)
 	if err != nil {
 		return nil, fmt.Errorf("Position - GetPositionByLogin - QueryRow: %w", err)
 	}
 
-	return &Position, nil
+	return &pos, nil
 }
 
 // GetPositionByID get Position by login
