@@ -3,75 +3,70 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"Trading-Service/internal/model"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Position postgres entity
 type Position struct {
-	Pool *pgxpool.Pool
+	Pool       *pgxpool.Pool
+	listenConn *pgx.Conn
 }
 
 // NewPositionRepository creating new Position repository
-func NewPositionRepository(pool *pgxpool.Pool) *Position {
-	return &Position{Pool: pool}
+func NewPositionRepository(pool *pgxpool.Pool, ctx context.Context) (*Position, error) {
+	repos := &Position{Pool: pool}
+	conn, err := repos.Pool.Acquire(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("position - startListen - Acquire: %w", err)
+	}
+	_, err = conn.Exec(ctx, "listen thresholds")
+	if err != nil {
+		conn.Release()
+		return nil, fmt.Errorf("position - startListen - Exec: %w", err)
+	}
+	repos.listenConn = conn.Conn()
+
+	return repos, nil
 }
 
 // CreatePosition create position
-func (r *Position) CreatePosition(ctx context.Context, position *model.Position) (*model.Position, error) {
-	position.Created = time.Now()
-	position.Updated = time.Now()
-	_, err := r.Pool.Exec(ctx,
-		`insert into positions (id, user, name, amount, stop_loss, take_profit, created, updated) values ($1, $2, $3, $4, $5, $6, $7. $8)
-			 where ;`,
-		position.ID, position.User, position.Name, position.Amount, position.StopLoss, position.TakeProfit, position.Created, position.Updated)
+func (p *Position) CreatePosition(ctx context.Context, position *model.Position) (*model.Position, error) {
+	row := p.Pool.QueryRow(ctx,
+		`insert into positions (id, user, name, amount, created, updated) values ($1, $2, $3, $4, $5, $6) returning id;`,
+		position.ID, position.User, position.Name, position.Amount, position.Created, position.Updated)
+	err := row.Scan(&position.ID)
 	if err != nil {
-		return nil, fmt.Errorf("position - CreatePosition - Exec: %w", err)
+		return nil, fmt.Errorf("position - CreatePosition - Scan: %w", err)
 	}
 
 	return position, nil
 }
 
-// GetPositionByLogin get Position by login
-func (r *Position) GetPositionByLogin(ctx context.Context, login string) (*model.Position, error) {
-	pos := model.Position{}
-	err := r.Pool.QueryRow(ctx, `select u.id, u.name, u.age, u.login, u.password, u.token, u.email, r.name
-									from positions u
-											 join roles r on r.id = u.role
-									where u.login = $1 and u.deleted=false`, login).Scan(
-		&pos.ID, &pos.Name, &pos.Age, &pos.Login, &pos.Password, &pos.Token, &pos.Email, &pos.Role)
+// GetPositionByID get Position by id
+func (p *Position) GetPositionByID(ctx context.Context, id string) (*model.Position, error) {
+	pos := &model.Position{}
+	row := p.Pool.QueryRow(ctx, `select id, user, name, amount, stop_loss, take_profit, closed, created
+									from positions where id = $1`, id)
+	err := row.Scan(
+		&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Created, &pos.Created)
 	if err != nil {
-		return nil, fmt.Errorf("Position - GetPositionByLogin - QueryRow: %w", err)
+		return nil, fmt.Errorf("position - GetPositionByLogin - Scan: %w", err)
 	}
 
-	return &pos, nil
-}
-
-// GetPositionByID get Position by login
-func (r *Position) GetPositionByID(ctx context.Context, id string) (*model.Position, error) {
-	Position := model.Position{}
-	err := r.Pool.QueryRow(ctx, `select u.id, u.name, u.age, u.login, u.password, u.token, u.email, r.name
-									from Positions u
-											 join roles r on r.id = u.role
-									where u.id = $1 and u.deleted=false`, id).Scan(
-		&Position.ID, &Position.Name, &Position.Age, &Position.Login, &Position.Password, &Position.Token, &Position.Email, &Position.Role)
-	if err != nil {
-		return nil, fmt.Errorf("Position - GetPositionByID - QueryRow: %w", err)
-	}
-
-	return &Position, nil
+	return pos, nil
 }
 
 // UpdatePosition update position excluding thresholds
-func (r *Position) UpdatePosition(ctx context.Context, position *model.Position) error {
-	var idCheck int
-	position.Updated = time.Now()
-	err := r.Pool.QueryRow(ctx, "update positions set amount=$1, updated=$2 where id=$3 and deleted=false returning id",
-		position.Amount, position.Updated, position.ID).Scan(&idCheck)
+func (p *Position) UpdatePosition(ctx context.Context, position *model.Position) error {
+	_, err := p.Pool.Exec(ctx, `update positions set amount=$1, updated=$2 where id=$3 and closed is not null;`,
+		position.Amount, position.Updated, position.ID)
 	if err != nil {
 		return fmt.Errorf("position - UpdatePosition - Exec: %w", err)
 	}
@@ -79,38 +74,52 @@ func (r *Position) UpdatePosition(ctx context.Context, position *model.Position)
 	return nil
 }
 
-// UpdateLowerThreshold update upper threshold
-func (r *Position) UpdateLowerThreshold(ctx context.Context, id, token string) error {
-	var idCheck int
-	err := r.Pool.QueryRow(ctx, "update Positions set token=$1, updated=$2 where id=$3 and deleted=false returning id",
-		token, time.Now(), id).Scan(&idCheck)
+// SetStopLoss set stop loss
+func (p *Position) SetStopLoss(ctx context.Context, id string, stopLoss float64, updated time.Time) error {
+	_, err := p.Pool.Exec(ctx, `update positions set stop_loss=$1, updated=$2 where id=$3 and deleted is not null;`,
+		stopLoss, updated, id)
 	if err != nil {
-		return fmt.Errorf("Position - RefreshPosition - Exec: %w", err)
+		return fmt.Errorf("position - SetStopLoss - Exec: %w", err)
 	}
 
 	return nil
 }
 
-// UpdateUpperThreshold update lower threshold
-func (r *Position) UpdateUpperThreshold(ctx context.Context, id, token string) error {
-	var idCheck int
-	err := r.Pool.QueryRow(ctx, "update Positions set token=$1, updated=$2 where id=$3 and deleted=false returning id",
-		token, time.Now(), id).Scan(&idCheck)
+// SetTakeProfit set take profit
+func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit float64, updated time.Time) error {
+	_, err := p.Pool.Exec(ctx, `update positions set take_profit=$1, updated=$2 where id=$3 and deleted is not null;`,
+		takeProfit, updated, id)
 	if err != nil {
-		return fmt.Errorf("Position - RefreshPosition - Exec: %w", err)
+		return fmt.Errorf("position - SetTakeProfit - Exec: %w", err)
 	}
 
 	return nil
 }
 
-// DeletePosition delete Position
-func (r *Position) DeletePosition(ctx context.Context, id string) error {
-	var idCheck int
-	err := r.Pool.QueryRow(ctx, "update Positions set Deleted=true, updated=$1 where id=$2 and deleted=false returning id",
-		time.Now(), id).Scan(&idCheck)
+// ClosePosition close position
+func (p *Position) ClosePosition(ctx context.Context, id string, closed, updated time.Time) (amount float64, err error) {
+	row := p.Pool.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount;",
+		closed, updated, id)
+	err = row.Scan(&amount)
 	if err != nil {
-		return fmt.Errorf("Position - DeletePosition - Exec: %w", err)
+		return 0, fmt.Errorf("position - ClosePosition - Exec: %w", err)
 	}
 
-	return nil
+	return amount, nil
+}
+
+// GetNotification get notification from listen/notify
+func (p *Position) GetNotification(ctx context.Context) (*model.Notification, error) {
+	msg, err := p.listenConn.WaitForNotification(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("position - GetNotification - WaitForNotification: %w", err)
+	}
+
+	notify := &model.Notification{}
+	err = json.Unmarshal([]byte(msg.Payload), &notify)
+	if err != nil {
+		return nil, fmt.Errorf("positions - GetNotification - Unmarshal: %w", err)
+	}
+
+	return notify, nil
 }

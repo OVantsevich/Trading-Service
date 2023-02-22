@@ -5,5 +5,5 @@ package model
 type Price struct {
 	Name string
 	SellingPrice,
-	PurchasePrice float32
+	PurchasePrice float64
 }
