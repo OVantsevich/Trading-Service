@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/OVantsevich/Price-Service v0.0.2-0.20230221140659-0740d5f0681a h1:S1xUla0G/YZ/1ZQEBWfkOTJ0FfU7UoTpViKltqM64qs=
 github.com/OVantsevich/Price-Service v0.0.2-0.20230221140659-0740d5f0681a/go.mod h1:Yfdp2A/GrClqicwoyGdNtDBgIbzrCn1+0boL/D8yHm8=
+github.com/OVantsevich/Price-Service v0.0.2-0.20230223083933-96be799743b9 h1:qtYJX3jMwX5+S0WFVxkrfSOffKwyrsth6/x5ePNFrSM=
+github.com/OVantsevich/Price-Service v0.0.2-0.20230223083933-96be799743b9/go.mod h1:Yfdp2A/GrClqicwoyGdNtDBgIbzrCn1+0boL/D8yHm8=
 github.com/OVantsevich/PriceProvider v0.0.0-20230221122400-394a1a4b0cd5 h1:zdleIIzKxTU27WIwtEk9N34JFyL7mcjaewmVe+/q0JU=
 github.com/OVantsevich/PriceProvider v0.0.0-20230221122400-394a1a4b0cd5/go.mod h1:HpBLyD/3SsJg+M1pxoAC+u30KW1iOlKwhsJvd19UMms=
 github.com/caarlos0/env/v7 v7.0.0 h1:cyczlTd/zREwSr9ch/mwaDl7Hse7kJuUY8hvHfXu5WI=

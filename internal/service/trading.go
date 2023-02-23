@@ -2,21 +2,20 @@
 package service
 
 import (
+	"Trading-Service/internal/repository"
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"Trading-Service/internal/model"
-
-	"github.com/google/uuid"
 )
 
-// batchSize number of messages read from mq
-const batchSize = 100
+// stopLoss stop loss
+const stopLoss = "stop_loss"
 
-// bufferSize number of messages stored for every grpc stream
-const bufferSize = 1000
+// takeProfit take profit
+const takeProfit = "take_profit"
 
 // PositionsRepository positions repository
 //
@@ -53,10 +52,13 @@ type PaymentService interface {
 //
 //go:generate mockery --name=ListenersRepository --case=underscore --output=./mocks
 type ListenersRepository interface {
-	CreateListenerTP(positionID, name string, amount float64) error
-	CreateListenerSL(positionID, name string, amount float64) error
-	SendPrices(prices []*model.Price) error
-	ClosePosition(ctx context.Context) (string, error)
+	CreateListenerTP(ctx context.Context, notify *model.Notification) error
+	CreateListenerSL(ctx context.Context, notify *model.Notification) error
+	RemoveListenerTP(notify *model.Notification) error
+	RemoveListenerSL(notify *model.Notification) error
+
+	SendPrices(prices []*model.Price)
+	ClosePosition(ctx context.Context) (*model.Notification, error)
 }
 
 // Trading trading service
@@ -65,68 +67,112 @@ type Trading struct {
 	listenersRepository ListenersRepository
 	priceService        PriceService
 	paymentService      PaymentService
+
+	transactor repository.PgxTransactor
 }
 
 // NewPrices constructor
-func NewPrices(ctx context.Context, spr StreamPoolRepository, mq MQ, pp PriceService, startPosition string, end <-chan struct{}) *Prices {
-	prc := &Prices{messageQueue: mq, priceProvider: pp, streamPool: spr}
-	go prc.cycle(ctx, end, startPosition)
+func NewPrices(ctx context.Context, lr ListenersRepository, pr PositionsRepository, pp PriceService, ps PaymentService, trx repository.PgxTransactor) *Trading {
+	prc := &Trading{positionsRepository: pr, priceService: pp, paymentService: ps, listenersRepository: lr, transactor: trx}
+	prc.startListener(ctx, getPricesListener).startListener(ctx, getNotificationListener).startListener(ctx, closePositionListener)
 	return prc
 }
 
-// Subscribe allocating new channel for grpc stream with id and returning it
-func (p *Prices) Subscribe(streamID uuid.UUID) chan *model.Price {
-	streamChan := make(chan *model.Price, bufferSize)
-	p.sMap.Store(streamID, streamChan)
-	return streamChan
+func (t *Trading) startListener(ctx context.Context, listener func(*Trading, context.Context, chan error)) *Trading {
+	errorChan := make(chan error)
+	go func(t *Trading, ctx context.Context, errorChan chan error) {
+		go listener(t, ctx, errorChan)
+		for {
+			select {
+			case <-ctx.Done():
+			case err := <-errorChan:
+				logrus.Error(err)
+			}
+		}
+	}(t, ctx, errorChan)
+	return t
 }
 
-// UpdateSubscription clear previous stream subscription and creat new
-func (p *Prices) UpdateSubscription(names []string, streamID uuid.UUID) error {
-	streamChan, ok := p.sMap.Load(streamID)
-	if !ok {
-		return fmt.Errorf("not found")
-	}
-	p.streamPool.Delete(streamID)
-	p.streamPool.Update(streamID, streamChan.(chan *model.Price), names)
-	return nil
-}
-
-// DeleteSubscription delete grpc stream subscription and close it's chan
-func (p *Prices) DeleteSubscription(streamID uuid.UUID) error {
-	streamChan, ok := p.sMap.Load(streamID)
-	if !ok {
-		return fmt.Errorf("not found")
-	}
-	p.streamPool.Delete(streamID)
-	close(streamChan.(chan *model.Price))
-	p.sMap.Delete(streamID)
-	return nil
-}
-
-func (p *Position) listen(ctx context.Context,
-	endChan chan struct{}, errChan chan error, messages chan *model.Notification,
-) {
-	connection := p.listenConn.Conn()
+func getPricesListener(t *Trading, ctx context.Context, errChan chan error) {
 	for {
 		select {
-		case <-endChan:
-			p.listenConn.Release()
+		case <-ctx.Done():
 		default:
-			msg, err := connection.WaitForNotification(ctx)
+			prices, err := t.priceService.GetPrices()
 			if err != nil {
-				errChan <- fmt.Errorf("position - listen - WaitForNotification: %w", err)
-				return
+				errChan <- fmt.Errorf("trading - getPricesListener - GetPrices: %w", err)
+				continue
+			}
+			t.listenersRepository.SendPrices(prices)
+		}
+	}
+}
+
+func getNotificationListener(t *Trading, ctx context.Context, errChan chan error) {
+	for {
+		select {
+		case <-ctx.Done():
+		default:
+			notify, err := t.positionsRepository.GetNotification(ctx)
+			if err != nil {
+				errChan <- fmt.Errorf("trading - getNotificationListener - GetNotification: %w", err)
+				continue
 			}
 
-			notify := &model.Notification{}
-			err = json.Unmarshal([]byte(msg.Payload), &notify)
+			switch notify.Type {
+			case takeProfit:
+				if notify.Closed != nil {
+					err = t.listenersRepository.RemoveListenerTP(notify)
+					errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerTP: %w", err)
+				}
+				err = t.listenersRepository.CreateListenerTP(ctx, notify)
+				errChan <- fmt.Errorf("trading - getNotificationListener - CreateListenerTP: %w", err)
+			case stopLoss:
+				if notify.Closed != nil {
+					err = t.listenersRepository.RemoveListenerSL(notify)
+					errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerSL: %w", err)
+				}
+				err = t.listenersRepository.CreateListenerSL(ctx, notify)
+				errChan <- fmt.Errorf("trading - getNotificationListener - CreateListenerSL: %w", err)
+			}
+		}
+	}
+}
+
+func closePositionListener(t *Trading, ctx context.Context, errChan chan error) {
+	for {
+		select {
+		case <-ctx.Done():
+		default:
+			notify, err := t.listenersRepository.ClosePosition(ctx)
 			if err != nil {
-				errChan <- fmt.Errorf("positions - listen - Unmarshal: %w", err)
-				return
+				errChan <- fmt.Errorf("trading - closePositionListener - ClosePosition: %w", err)
+				continue
 			}
 
-			messages <- notify
+			err = t.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
+				amount, trxErr := t.positionsRepository.ClosePosition(ctx, notify.ID, time.Now(), time.Now())
+				if trxErr != nil {
+					trxErr = fmt.Errorf("trading - closePositionListener - ClosePosition: %w", trxErr)
+					return trxErr
+				}
+
+				sum := amount * notify.Price
+				var accountID string
+				accountID, trxErr = t.paymentService.GetAccount(notify.User)
+				if trxErr != nil {
+					trxErr = fmt.Errorf("trading - closePositionListener - GetAccount: %w", trxErr)
+					return trxErr
+				}
+
+				trxErr = t.paymentService.IncreaseAmount(accountID, sum)
+				if trxErr != nil {
+					trxErr = fmt.Errorf("trading - closePositionListener - IncreaseAmount: %w", trxErr)
+					return trxErr
+				}
+				return nil
+			})
+
 		}
 	}
 }

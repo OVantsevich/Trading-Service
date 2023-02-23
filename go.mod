@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/OVantsevich/Price-Service v0.0.2-0.20230221140659-0740d5f0681a // indirect
+	github.com/OVantsevich/Price-Service v0.0.2-0.20230223083933-96be799743b9 // indirect
 	github.com/OVantsevich/PriceProvider v0.0.0-20230221122400-394a1a4b0cd5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

@@ -10,19 +10,18 @@ import (
 	"Trading-Service/internal/model"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Position postgres entity
 type Position struct {
-	Pool       *pgxpool.Pool
+	PgxWithinTransactionRunner
 	listenConn *pgx.Conn
 }
 
 // NewPositionRepository creating new Position repository
-func NewPositionRepository(pool *pgxpool.Pool, ctx context.Context) (*Position, error) {
-	repos := &Position{Pool: pool}
-	conn, err := repos.Pool.Acquire(ctx)
+func NewPositionRepository(p PgxWithinTransactionRunner, ctx context.Context) (*Position, error) {
+	repos := &Position{PgxWithinTransactionRunner: p}
+	conn, err := repos.Pool().Acquire(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("position - startListen - Acquire: %w", err)
 	}
@@ -38,7 +37,7 @@ func NewPositionRepository(pool *pgxpool.Pool, ctx context.Context) (*Position, 
 
 // CreatePosition create position
 func (p *Position) CreatePosition(ctx context.Context, position *model.Position) (*model.Position, error) {
-	row := p.Pool.QueryRow(ctx,
+	row := p.QueryRow(ctx,
 		`insert into positions (id, user, name, amount, created, updated) values ($1, $2, $3, $4, $5, $6) returning id;`,
 		position.ID, position.User, position.Name, position.Amount, position.Created, position.Updated)
 	err := row.Scan(&position.ID)
@@ -52,7 +51,7 @@ func (p *Position) CreatePosition(ctx context.Context, position *model.Position)
 // GetPositionByID get Position by id
 func (p *Position) GetPositionByID(ctx context.Context, id string) (*model.Position, error) {
 	pos := &model.Position{}
-	row := p.Pool.QueryRow(ctx, `select id, user, name, amount, stop_loss, take_profit, closed, created
+	row := p.QueryRow(ctx, `select id, user, name, amount, stop_loss, take_profit, closed, created
 									from positions where id = $1`, id)
 	err := row.Scan(
 		&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Created, &pos.Created)
@@ -65,7 +64,7 @@ func (p *Position) GetPositionByID(ctx context.Context, id string) (*model.Posit
 
 // UpdatePosition update position excluding thresholds
 func (p *Position) UpdatePosition(ctx context.Context, position *model.Position) error {
-	_, err := p.Pool.Exec(ctx, `update positions set amount=$1, updated=$2 where id=$3 and closed is not null;`,
+	_, err := p.Exec(ctx, `update positions set amount=$1, updated=$2 where id=$3 and closed is not null;`,
 		position.Amount, position.Updated, position.ID)
 	if err != nil {
 		return fmt.Errorf("position - UpdatePosition - Exec: %w", err)
@@ -76,7 +75,7 @@ func (p *Position) UpdatePosition(ctx context.Context, position *model.Position)
 
 // SetStopLoss set stop loss
 func (p *Position) SetStopLoss(ctx context.Context, id string, stopLoss float64, updated time.Time) error {
-	_, err := p.Pool.Exec(ctx, `update positions set stop_loss=$1, updated=$2 where id=$3 and deleted is not null;`,
+	_, err := p.Exec(ctx, `update positions set stop_loss=$1, updated=$2 where id=$3 and deleted is not null;`,
 		stopLoss, updated, id)
 	if err != nil {
 		return fmt.Errorf("position - SetStopLoss - Exec: %w", err)
@@ -87,7 +86,7 @@ func (p *Position) SetStopLoss(ctx context.Context, id string, stopLoss float64,
 
 // SetTakeProfit set take profit
 func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit float64, updated time.Time) error {
-	_, err := p.Pool.Exec(ctx, `update positions set take_profit=$1, updated=$2 where id=$3 and deleted is not null;`,
+	_, err := p.Exec(ctx, `update positions set take_profit=$1, updated=$2 where id=$3 and deleted is not null;`,
 		takeProfit, updated, id)
 	if err != nil {
 		return fmt.Errorf("position - SetTakeProfit - Exec: %w", err)
@@ -98,7 +97,7 @@ func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit floa
 
 // ClosePosition close position
 func (p *Position) ClosePosition(ctx context.Context, id string, closed, updated time.Time) (amount float64, err error) {
-	row := p.Pool.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount;",
+	row := p.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount;",
 		closed, updated, id)
 	err = row.Scan(&amount)
 	if err != nil {

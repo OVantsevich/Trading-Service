@@ -20,12 +20,12 @@ create unique index if not exists position_user_name_closed_uindex
     on position (user, name, closed);
 
 CREATE TRIGGER stop_loss
-    AFTER UPDATE OF stop_loss
+    AFTER UPDATE OF stop_loss, closed
     ON position
 EXECUTE FUNCTION notify();
 
 CREATE TRIGGER take_profit
-    AFTER UPDATE OF take_profit
+    AFTER UPDATE OF take_profit, closed
     ON position
 EXECUTE FUNCTION notify();
 
@@ -37,13 +37,15 @@ BEGIN
     payload = jsonb_build_object(
             'id', to_jsonb(OLD.id),
             'name', to_jsonb(OLD.name),
+            'user', to_jsonb(OLD.user),
             'type', to_jsonb(TG_NAME),
+            'closed', to_jsonb(NEW.closed),
         );
     IF TG_NAME = 'stop_loss' THEN
-        payload = jsonb_set(payload, 'amount', OLD.stop_loss, true);
+        payload = jsonb_set(payload, 'price', OLD.stop_loss, true);
     END IF;
     IF TG_NAME = 'take_profit' THEN
-        payload = jsonb_set(payload, 'amount', OLD.take_profit, true);
+        payload = jsonb_set(payload, 'price', OLD.take_profit, true);
     END IF;
 
     PERFORM pg_notify('thresholds', payload::TEXT);
