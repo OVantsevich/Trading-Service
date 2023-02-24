@@ -2,11 +2,12 @@ syntax = "proto3";
 option go_package = ".";
 
 service TradingService{
-  rpc OpenPosition(OpenPositionRequest)returns(Response);
+  rpc OpenPosition(OpenPositionRequest)returns(OpenPositionResponse);
   rpc ClosePosition(ClosePositionRequest)returns(Response);
+  rpc GetPositionByID(GetPositionByIDRequest)returns(GetPositionByIDResponse);
+  rpc GetUserPositions(GetUserPositionsRequest)returns(GetUserPositionsResponse);
   rpc StopLoss(StopLossRequest)returns(Response);
   rpc TakeProfit(TakeProfitRequest)returns(Response);
-  rpc ProfitAndLoss(ProfitAndLossRequest)returns(ProfitAndLossResponse);
 }
 
 message OpenPositionRequest{
@@ -15,36 +16,49 @@ message OpenPositionRequest{
   double amount = 3;
 }
 
+message OpenPositionResponse{
+  Position position  = 1;
+}
+
 message ClosePositionRequest{
-  string userID = 1;
-  string name = 2;
+  string positionID = 1;
 }
 
 message StopLossRequest{
-  string userID = 1;
-  string name = 2;
-  double price = 3;
+  string positionID = 1;
+  double price = 2;
 }
 
 message TakeProfitRequest{
+  string positionID = 1;
+  double price = 2;
+}
+
+message GetPositionByIDRequest{
+  string positionID = 1;
+}
+
+message GetPositionByIDResponse{
+  Position position = 1;
+}
+
+message GetUserPositionsRequest{
   string userID = 1;
-  string name = 2;
-  double price = 3;
+}
+
+message GetUserPositionsResponse{
+  repeated Position position = 1;
 }
 
 message Response{
-  bool success = 1;
-}
-
-message ProfitAndLossRequest{
-  string userID = 1;
-}
-
-message ProfitAndLossResponse{
-  repeated Position data = 1;
 }
 
 message Position{
-  string name = 1;
-  double amount = 2;
+  string id = 1;
+  string name = 2;
+  double amount = 3;
+  optional double stop_loss = 4;
+  optional double take_profit = 5;
+  optional int64 created = 6;
+  optional int64 closed = 7;
 }

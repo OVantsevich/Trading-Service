@@ -22,11 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TradingServiceClient interface {
-	OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*Response, error)
+	OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionResponse, error)
 	ClosePosition(ctx context.Context, in *ClosePositionRequest, opts ...grpc.CallOption) (*Response, error)
-	LowerThreshold(ctx context.Context, in *LowerThresholdRequest, opts ...grpc.CallOption) (*Response, error)
-	UpperThreshold(ctx context.Context, in *UpperThresholdRequest, opts ...grpc.CallOption) (*Response, error)
-	GetPositions(ctx context.Context, in *GetPositionsRequest, opts ...grpc.CallOption) (*GetPositionsResponse, error)
+	GetPositionByID(ctx context.Context, in *GetPositionByIDRequest, opts ...grpc.CallOption) (*GetPositionByIDResponse, error)
+	GetUserPositions(ctx context.Context, in *GetUserPositionsRequest, opts ...grpc.CallOption) (*GetUserPositionsResponse, error)
+	StopLoss(ctx context.Context, in *StopLossRequest, opts ...grpc.CallOption) (*Response, error)
+	TakeProfit(ctx context.Context, in *TakeProfitRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type tradingServiceClient struct {
@@ -37,8 +38,8 @@ func NewTradingServiceClient(cc grpc.ClientConnInterface) TradingServiceClient {
 	return &tradingServiceClient{cc}
 }
 
-func (c *tradingServiceClient) OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
+func (c *tradingServiceClient) OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionResponse, error) {
+	out := new(OpenPositionResponse)
 	err := c.cc.Invoke(ctx, "/TradingService/OpenPosition", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,27 +56,36 @@ func (c *tradingServiceClient) ClosePosition(ctx context.Context, in *ClosePosit
 	return out, nil
 }
 
-func (c *tradingServiceClient) LowerThreshold(ctx context.Context, in *LowerThresholdRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/TradingService/LowerThreshold", in, out, opts...)
+func (c *tradingServiceClient) GetPositionByID(ctx context.Context, in *GetPositionByIDRequest, opts ...grpc.CallOption) (*GetPositionByIDResponse, error) {
+	out := new(GetPositionByIDResponse)
+	err := c.cc.Invoke(ctx, "/TradingService/GetPositionByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tradingServiceClient) UpperThreshold(ctx context.Context, in *UpperThresholdRequest, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/TradingService/UpperThreshold", in, out, opts...)
+func (c *tradingServiceClient) GetUserPositions(ctx context.Context, in *GetUserPositionsRequest, opts ...grpc.CallOption) (*GetUserPositionsResponse, error) {
+	out := new(GetUserPositionsResponse)
+	err := c.cc.Invoke(ctx, "/TradingService/GetUserPositions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *tradingServiceClient) GetPositions(ctx context.Context, in *GetPositionsRequest, opts ...grpc.CallOption) (*GetPositionsResponse, error) {
-	out := new(GetPositionsResponse)
-	err := c.cc.Invoke(ctx, "/TradingService/GetPositions", in, out, opts...)
+func (c *tradingServiceClient) StopLoss(ctx context.Context, in *StopLossRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/TradingService/StopLoss", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tradingServiceClient) TakeProfit(ctx context.Context, in *TakeProfitRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/TradingService/TakeProfit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +96,12 @@ func (c *tradingServiceClient) GetPositions(ctx context.Context, in *GetPosition
 // All implementations must embed UnimplementedTradingServiceServer
 // for forward compatibility
 type TradingServiceServer interface {
-	OpenPosition(context.Context, *OpenPositionRequest) (*Response, error)
+	OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionResponse, error)
 	ClosePosition(context.Context, *ClosePositionRequest) (*Response, error)
-	LowerThreshold(context.Context, *LowerThresholdRequest) (*Response, error)
-	UpperThreshold(context.Context, *UpperThresholdRequest) (*Response, error)
-	GetPositions(context.Context, *GetPositionsRequest) (*GetPositionsResponse, error)
+	GetPositionByID(context.Context, *GetPositionByIDRequest) (*GetPositionByIDResponse, error)
+	GetUserPositions(context.Context, *GetUserPositionsRequest) (*GetUserPositionsResponse, error)
+	StopLoss(context.Context, *StopLossRequest) (*Response, error)
+	TakeProfit(context.Context, *TakeProfitRequest) (*Response, error)
 	mustEmbedUnimplementedTradingServiceServer()
 }
 
@@ -98,20 +109,23 @@ type TradingServiceServer interface {
 type UnimplementedTradingServiceServer struct {
 }
 
-func (UnimplementedTradingServiceServer) OpenPosition(context.Context, *OpenPositionRequest) (*Response, error) {
+func (UnimplementedTradingServiceServer) OpenPosition(context.Context, *OpenPositionRequest) (*OpenPositionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OpenPosition not implemented")
 }
 func (UnimplementedTradingServiceServer) ClosePosition(context.Context, *ClosePositionRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClosePosition not implemented")
 }
-func (UnimplementedTradingServiceServer) LowerThreshold(context.Context, *LowerThresholdRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LowerThreshold not implemented")
+func (UnimplementedTradingServiceServer) GetPositionByID(context.Context, *GetPositionByIDRequest) (*GetPositionByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPositionByID not implemented")
 }
-func (UnimplementedTradingServiceServer) UpperThreshold(context.Context, *UpperThresholdRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpperThreshold not implemented")
+func (UnimplementedTradingServiceServer) GetUserPositions(context.Context, *GetUserPositionsRequest) (*GetUserPositionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserPositions not implemented")
 }
-func (UnimplementedTradingServiceServer) GetPositions(context.Context, *GetPositionsRequest) (*GetPositionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPositions not implemented")
+func (UnimplementedTradingServiceServer) StopLoss(context.Context, *StopLossRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopLoss not implemented")
+}
+func (UnimplementedTradingServiceServer) TakeProfit(context.Context, *TakeProfitRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TakeProfit not implemented")
 }
 func (UnimplementedTradingServiceServer) mustEmbedUnimplementedTradingServiceServer() {}
 
@@ -162,56 +176,74 @@ func _TradingService_ClosePosition_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TradingService_LowerThreshold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LowerThresholdRequest)
+func _TradingService_GetPositionByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPositionByIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TradingServiceServer).LowerThreshold(ctx, in)
+		return srv.(TradingServiceServer).GetPositionByID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/LowerThreshold",
+		FullMethod: "/TradingService/GetPositionByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradingServiceServer).LowerThreshold(ctx, req.(*LowerThresholdRequest))
+		return srv.(TradingServiceServer).GetPositionByID(ctx, req.(*GetPositionByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TradingService_UpperThreshold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpperThresholdRequest)
+func _TradingService_GetUserPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserPositionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TradingServiceServer).UpperThreshold(ctx, in)
+		return srv.(TradingServiceServer).GetUserPositions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/UpperThreshold",
+		FullMethod: "/TradingService/GetUserPositions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradingServiceServer).UpperThreshold(ctx, req.(*UpperThresholdRequest))
+		return srv.(TradingServiceServer).GetUserPositions(ctx, req.(*GetUserPositionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TradingService_GetPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPositionsRequest)
+func _TradingService_StopLoss_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopLossRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TradingServiceServer).GetPositions(ctx, in)
+		return srv.(TradingServiceServer).StopLoss(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/GetPositions",
+		FullMethod: "/TradingService/StopLoss",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TradingServiceServer).GetPositions(ctx, req.(*GetPositionsRequest))
+		return srv.(TradingServiceServer).StopLoss(ctx, req.(*StopLossRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TradingService_TakeProfit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TakeProfitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TradingServiceServer).TakeProfit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TradingService/TakeProfit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TradingServiceServer).TakeProfit(ctx, req.(*TakeProfitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -232,16 +264,20 @@ var TradingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TradingService_ClosePosition_Handler,
 		},
 		{
-			MethodName: "LowerThreshold",
-			Handler:    _TradingService_LowerThreshold_Handler,
+			MethodName: "GetPositionByID",
+			Handler:    _TradingService_GetPositionByID_Handler,
 		},
 		{
-			MethodName: "UpperThreshold",
-			Handler:    _TradingService_UpperThreshold_Handler,
+			MethodName: "GetUserPositions",
+			Handler:    _TradingService_GetUserPositions_Handler,
 		},
 		{
-			MethodName: "GetPositions",
-			Handler:    _TradingService_GetPositions_Handler,
+			MethodName: "StopLoss",
+			Handler:    _TradingService_StopLoss_Handler,
+		},
+		{
+			MethodName: "TakeProfit",
+			Handler:    _TradingService_TakeProfit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

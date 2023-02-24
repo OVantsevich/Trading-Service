@@ -30,7 +30,9 @@ func NewListenersRepository() *ListenersRepository {
 }
 
 // CreateListenerTP create take profit listener
-func (l ListenersRepository) CreateListenerTP(ctx context.Context, notify *model.Notification) error {
+//
+//nolint:dupl //just because
+func (l *ListenersRepository) CreateListenerTP(ctx context.Context, notify *model.Notification) error {
 	l.mu.Lock()
 	lis := l.listenersTP[notify.Name]
 	_, ok := lis[notify.ID]
@@ -46,7 +48,9 @@ func (l ListenersRepository) CreateListenerTP(ctx context.Context, notify *model
 }
 
 // CreateListenerSL create stop loss listener
-func (l ListenersRepository) CreateListenerSL(ctx context.Context, notify *model.Notification) error {
+//
+//nolint:dupl //just because
+func (l *ListenersRepository) CreateListenerSL(ctx context.Context, notify *model.Notification) error {
 	l.mu.Lock()
 	lis := l.listenersSL[notify.Name]
 	_, ok := lis[notify.ID]
@@ -62,7 +66,7 @@ func (l ListenersRepository) CreateListenerSL(ctx context.Context, notify *model
 }
 
 // RemoveListenerTP remove take profit listener
-func (l ListenersRepository) RemoveListenerTP(notify *model.Notification) error {
+func (l *ListenersRepository) RemoveListenerTP(notify *model.Notification) error {
 	l.mu.Lock()
 	lis := l.listenersTP[notify.Name]
 	channel, ok := lis[notify.ID]
@@ -77,7 +81,7 @@ func (l ListenersRepository) RemoveListenerTP(notify *model.Notification) error 
 }
 
 // RemoveListenerSL remove stop loss listener
-func (l ListenersRepository) RemoveListenerSL(notify *model.Notification) error {
+func (l *ListenersRepository) RemoveListenerSL(notify *model.Notification) error {
 	l.mu.Lock()
 	lis := l.listenersSL[notify.Name]
 	channel, ok := lis[notify.ID]
@@ -92,7 +96,7 @@ func (l ListenersRepository) RemoveListenerSL(notify *model.Notification) error 
 }
 
 // SendPrices sending prices for all listeners
-func (l ListenersRepository) SendPrices(prices []*model.Price) {
+func (l *ListenersRepository) SendPrices(prices []*model.Price) {
 	l.mu.RLock()
 	for _, p := range prices {
 		for _, lis := range l.listenersSL[p.Name] {
@@ -106,7 +110,7 @@ func (l ListenersRepository) SendPrices(prices []*model.Price) {
 }
 
 // ClosePosition sync await for closed position from listeners
-func (l ListenersRepository) ClosePosition(ctx context.Context) (*model.Notification, error) {
+func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notification, error) {
 	select {
 	case <-ctx.Done():
 		return nil, fmt.Errorf("listenersRepository - ClosePosition: context canceld")

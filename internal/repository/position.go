@@ -2,6 +2,7 @@
 package repository
 
 import (
+	"container/list"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -19,7 +20,7 @@ type Position struct {
 }
 
 // NewPositionRepository creating new Position repository
-func NewPositionRepository(p PgxWithinTransactionRunner, ctx context.Context) (*Position, error) {
+func NewPositionRepository(ctx context.Context, p PgxWithinTransactionRunner) (*Position, error) {
 	repos := &Position{PgxWithinTransactionRunner: p}
 	conn, err := repos.Pool().Acquire(ctx)
 	if err != nil {
@@ -49,10 +50,10 @@ func (p *Position) CreatePosition(ctx context.Context, position *model.Position)
 }
 
 // GetPositionByID get Position by id
-func (p *Position) GetPositionByID(ctx context.Context, id string) (*model.Position, error) {
+func (p *Position) GetPositionByID(ctx context.Context, positionID string) (*model.Position, error) {
 	pos := &model.Position{}
 	row := p.QueryRow(ctx, `select id, user, name, amount, stop_loss, take_profit, closed, created
-									from positions where id = $1`, id)
+									from positions where id = $1`, positionID)
 	err := row.Scan(
 		&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Created, &pos.Created)
 	if err != nil {
@@ -60,6 +61,35 @@ func (p *Position) GetPositionByID(ctx context.Context, id string) (*model.Posit
 	}
 
 	return pos, nil
+}
+
+// GetUserPositions get positions by user id
+func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*model.Position, error) {
+	rows, err := p.Query(ctx, `select id, name, amount, stop_loss, take_profit, closed, created
+									from positions where user = $1`, userID)
+	if err != nil {
+		return nil, fmt.Errorf("position - GetUserPositions - Query: %w", err)
+	}
+
+	var poss list.List
+	for rows.Next() {
+		pos := &model.Position{
+			User: userID,
+		}
+		err = rows.Scan(&pos.ID, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Closed, &pos.Created)
+		if err != nil {
+			return nil, fmt.Errorf("position - GetUserPositions - Scan: %w", err)
+		}
+		poss.PushBack(pos)
+	}
+	result := make([]*model.Position, poss.Len())
+	i := 0
+	for e := poss.Back(); e != nil; e = e.Prev() {
+		result[i] = e.Value.(*model.Position)
+		i++
+	}
+
+	return result, nil
 }
 
 // UpdatePosition update position excluding thresholds
@@ -96,15 +126,16 @@ func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit floa
 }
 
 // ClosePosition close position
-func (p *Position) ClosePosition(ctx context.Context, id string, closed, updated time.Time) (amount float64, err error) {
-	row := p.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount;",
+func (p *Position) ClosePosition(ctx context.Context, id string, closed, updated time.Time) (*model.Position, error) {
+	pos := &model.Position{}
+	row := p.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount, name, user;",
 		closed, updated, id)
-	err = row.Scan(&amount)
+	err := row.Scan(&pos.Amount, &pos.Name, &pos.User)
 	if err != nil {
-		return 0, fmt.Errorf("position - ClosePosition - Exec: %w", err)
+		return nil, fmt.Errorf("position - ClosePosition - Exec: %w", err)
 	}
 
-	return amount, nil
+	return pos, nil
 }
 
 // GetNotification get notification from listen/notify

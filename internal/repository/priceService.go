@@ -18,10 +18,13 @@ type PriceService struct {
 }
 
 // NewPriceServiceRepository price service repository constructor
-func NewPriceServiceRepository(pspp psProto.PriceServiceClient, ctx context.Context) *PriceService {
+func NewPriceServiceRepository(ctx context.Context, pspp psProto.PriceServiceClient) (*PriceService, error) {
 	ps := &PriceService{client: pspp, ctx: ctx}
-	ps.subscribe()
-	return ps
+	err := ps.subscribe()
+	if err != nil {
+		return nil, fmt.Errorf("priceService - NewPriceServiceRepository - subscribe : %w", err)
+	}
+	return ps, nil
 }
 
 func (ps *PriceService) subscribe() (err error) {
@@ -30,6 +33,16 @@ func (ps *PriceService) subscribe() (err error) {
 		return fmt.Errorf("priceService - Sebscribe - GetPrices: %e", err)
 	}
 	return
+}
+
+// GetCurrentPrices get current prices by names
+func (ps *PriceService) GetCurrentPrices(ctx context.Context, names []string) (map[string]*model.Price, error) {
+	grpcPrices, err := ps.client.GetCurrentPrices(ctx, &psProto.GetCurrentPricesRequest{Names: names})
+	if err != nil {
+		return nil, fmt.Errorf("priceService - GetCurrentPrices - GetCurrentPrices: %w", err)
+	}
+	prices := mapFromGRPC(grpcPrices.Prices)
+	return prices, nil
 }
 
 // GetPrices get prices from price service
@@ -52,6 +65,18 @@ func (ps *PriceService) UpdateSubscription(names []string) error {
 
 func fromGRPC(recv []*psProto.Price) []*model.Price {
 	result := make([]*model.Price, len(recv))
+	for i, p := range recv {
+		result[i] = &model.Price{
+			Name:          p.Name,
+			SellingPrice:  p.SellingPrice,
+			PurchasePrice: p.PurchasePrice,
+		}
+	}
+	return result
+}
+
+func mapFromGRPC(recv map[string]*psProto.Price) map[string]*model.Price {
+	result := make(map[string]*model.Price, len(recv))
 	for i, p := range recv {
 		result[i] = &model.Price{
 			Name:          p.Name,

@@ -83,20 +83,65 @@ func (x *OpenPositionRequest) GetAmount() float64 {
 	return 0
 }
 
+type OpenPositionResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Position *Position `protobuf:"bytes,1,opt,name=position,proto3" json:"position,omitempty"`
+}
+
+func (x *OpenPositionResponse) Reset() {
+	*x = OpenPositionResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *OpenPositionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpenPositionResponse) ProtoMessage() {}
+
+func (x *OpenPositionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpenPositionResponse.ProtoReflect.Descriptor instead.
+func (*OpenPositionResponse) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *OpenPositionResponse) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
 type ClosePositionRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID string  `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	Name   string  `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Amount float64 `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	PositionID string `protobuf:"bytes,1,opt,name=positionID,proto3" json:"positionID,omitempty"`
 }
 
 func (x *ClosePositionRequest) Reset() {
 	*x = ClosePositionRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[1]
+		mi := &file_proto_model_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -109,7 +154,7 @@ func (x *ClosePositionRequest) String() string {
 func (*ClosePositionRequest) ProtoMessage() {}
 
 func (x *ClosePositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[1]
+	mi := &file_proto_model_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -122,105 +167,27 @@ func (x *ClosePositionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClosePositionRequest.ProtoReflect.Descriptor instead.
 func (*ClosePositionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_model_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ClosePositionRequest) GetUserID() string {
-	if x != nil {
-		return x.UserID
-	}
-	return ""
-}
-
-func (x *ClosePositionRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ClosePositionRequest) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-type LowerThresholdRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserID string  `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	Name   string  `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Price  float64 `protobuf:"fixed64,3,opt,name=price,proto3" json:"price,omitempty"`
-}
-
-func (x *LowerThresholdRequest) Reset() {
-	*x = LowerThresholdRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LowerThresholdRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LowerThresholdRequest) ProtoMessage() {}
-
-func (x *LowerThresholdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LowerThresholdRequest.ProtoReflect.Descriptor instead.
-func (*LowerThresholdRequest) Descriptor() ([]byte, []int) {
 	return file_proto_model_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *LowerThresholdRequest) GetUserID() string {
+func (x *ClosePositionRequest) GetPositionID() string {
 	if x != nil {
-		return x.UserID
+		return x.PositionID
 	}
 	return ""
 }
 
-func (x *LowerThresholdRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *LowerThresholdRequest) GetPrice() float64 {
-	if x != nil {
-		return x.Price
-	}
-	return 0
-}
-
-type UpperThresholdRequest struct {
+type StopLossRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID string  `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	Name   string  `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Price  float64 `protobuf:"fixed64,3,opt,name=price,proto3" json:"price,omitempty"`
+	PositionID string  `protobuf:"bytes,1,opt,name=positionID,proto3" json:"positionID,omitempty"`
+	Price      float64 `protobuf:"fixed64,2,opt,name=price,proto3" json:"price,omitempty"`
 }
 
-func (x *UpperThresholdRequest) Reset() {
-	*x = UpperThresholdRequest{}
+func (x *StopLossRequest) Reset() {
+	*x = StopLossRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_model_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -228,13 +195,13 @@ func (x *UpperThresholdRequest) Reset() {
 	}
 }
 
-func (x *UpperThresholdRequest) String() string {
+func (x *StopLossRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpperThresholdRequest) ProtoMessage() {}
+func (*StopLossRequest) ProtoMessage() {}
 
-func (x *UpperThresholdRequest) ProtoReflect() protoreflect.Message {
+func (x *StopLossRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_model_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -246,44 +213,278 @@ func (x *UpperThresholdRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpperThresholdRequest.ProtoReflect.Descriptor instead.
-func (*UpperThresholdRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use StopLossRequest.ProtoReflect.Descriptor instead.
+func (*StopLossRequest) Descriptor() ([]byte, []int) {
 	return file_proto_model_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpperThresholdRequest) GetUserID() string {
+func (x *StopLossRequest) GetPositionID() string {
 	if x != nil {
-		return x.UserID
+		return x.PositionID
 	}
 	return ""
 }
 
-func (x *UpperThresholdRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpperThresholdRequest) GetPrice() float64 {
+func (x *StopLossRequest) GetPrice() float64 {
 	if x != nil {
 		return x.Price
 	}
 	return 0
 }
 
-type Response struct {
+type TakeProfitRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	PositionID string  `protobuf:"bytes,1,opt,name=positionID,proto3" json:"positionID,omitempty"`
+	Price      float64 `protobuf:"fixed64,2,opt,name=price,proto3" json:"price,omitempty"`
+}
+
+func (x *TakeProfitRequest) Reset() {
+	*x = TakeProfitRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TakeProfitRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TakeProfitRequest) ProtoMessage() {}
+
+func (x *TakeProfitRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TakeProfitRequest.ProtoReflect.Descriptor instead.
+func (*TakeProfitRequest) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TakeProfitRequest) GetPositionID() string {
+	if x != nil {
+		return x.PositionID
+	}
+	return ""
+}
+
+func (x *TakeProfitRequest) GetPrice() float64 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+type GetPositionByIDRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PositionID string `protobuf:"bytes,1,opt,name=positionID,proto3" json:"positionID,omitempty"`
+}
+
+func (x *GetPositionByIDRequest) Reset() {
+	*x = GetPositionByIDRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetPositionByIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPositionByIDRequest) ProtoMessage() {}
+
+func (x *GetPositionByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPositionByIDRequest.ProtoReflect.Descriptor instead.
+func (*GetPositionByIDRequest) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetPositionByIDRequest) GetPositionID() string {
+	if x != nil {
+		return x.PositionID
+	}
+	return ""
+}
+
+type GetPositionByIDResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Position *Position `protobuf:"bytes,1,opt,name=position,proto3" json:"position,omitempty"`
+}
+
+func (x *GetPositionByIDResponse) Reset() {
+	*x = GetPositionByIDResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetPositionByIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPositionByIDResponse) ProtoMessage() {}
+
+func (x *GetPositionByIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPositionByIDResponse.ProtoReflect.Descriptor instead.
+func (*GetPositionByIDResponse) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetPositionByIDResponse) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+type GetUserPositionsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserID string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *GetUserPositionsRequest) Reset() {
+	*x = GetUserPositionsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserPositionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserPositionsRequest) ProtoMessage() {}
+
+func (x *GetUserPositionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserPositionsRequest.ProtoReflect.Descriptor instead.
+func (*GetUserPositionsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetUserPositionsRequest) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+type GetUserPositionsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Position []*Position `protobuf:"bytes,1,rep,name=position,proto3" json:"position,omitempty"`
+}
+
+func (x *GetUserPositionsResponse) Reset() {
+	*x = GetUserPositionsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_model_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserPositionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserPositionsResponse) ProtoMessage() {}
+
+func (x *GetUserPositionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_model_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserPositionsResponse.ProtoReflect.Descriptor instead.
+func (*GetUserPositionsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_model_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetUserPositionsResponse) GetPosition() []*Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+type Response struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
 }
 
 func (x *Response) Reset() {
 	*x = Response{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[4]
+		mi := &file_proto_model_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -296,7 +497,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[4]
+	mi := &file_proto_model_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -309,108 +510,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_proto_model_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Response) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type GetPositionsRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserID string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-}
-
-func (x *GetPositionsRequest) Reset() {
-	*x = GetPositionsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetPositionsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetPositionsRequest) ProtoMessage() {}
-
-func (x *GetPositionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetPositionsRequest.ProtoReflect.Descriptor instead.
-func (*GetPositionsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_model_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetPositionsRequest) GetUserID() string {
-	if x != nil {
-		return x.UserID
-	}
-	return ""
-}
-
-type GetPositionsResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Data []*Position `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
-}
-
-func (x *GetPositionsResponse) Reset() {
-	*x = GetPositionsResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetPositionsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetPositionsResponse) ProtoMessage() {}
-
-func (x *GetPositionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetPositionsResponse.ProtoReflect.Descriptor instead.
-func (*GetPositionsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_model_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetPositionsResponse) GetData() []*Position {
-	if x != nil {
-		return x.Data
-	}
-	return nil
+	return file_proto_model_proto_rawDescGZIP(), []int{9}
 }
 
 type Position struct {
@@ -418,14 +518,19 @@ type Position struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name   string  `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Amount float64 `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Id         string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name       string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Amount     float64  `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	StopLoss   *float64 `protobuf:"fixed64,4,opt,name=stop_loss,json=stopLoss,proto3,oneof" json:"stop_loss,omitempty"`
+	TakeProfit *float64 `protobuf:"fixed64,5,opt,name=take_profit,json=takeProfit,proto3,oneof" json:"take_profit,omitempty"`
+	Created    *int64   `protobuf:"varint,6,opt,name=created,proto3,oneof" json:"created,omitempty"`
+	Closed     *int64   `protobuf:"varint,7,opt,name=closed,proto3,oneof" json:"closed,omitempty"`
 }
 
 func (x *Position) Reset() {
 	*x = Position{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_model_proto_msgTypes[7]
+		mi := &file_proto_model_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -438,7 +543,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_model_proto_msgTypes[7]
+	mi := &file_proto_model_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +556,14 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_proto_model_proto_rawDescGZIP(), []int{7}
+	return file_proto_model_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Position) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 func (x *Position) GetName() string {
@@ -468,6 +580,34 @@ func (x *Position) GetAmount() float64 {
 	return 0
 }
 
+func (x *Position) GetStopLoss() float64 {
+	if x != nil && x.StopLoss != nil {
+		return *x.StopLoss
+	}
+	return 0
+}
+
+func (x *Position) GetTakeProfit() float64 {
+	if x != nil && x.TakeProfit != nil {
+		return *x.TakeProfit
+	}
+	return 0
+}
+
+func (x *Position) GetCreated() int64 {
+	if x != nil && x.Created != nil {
+		return *x.Created
+	}
+	return 0
+}
+
+func (x *Position) GetClosed() int64 {
+	if x != nil && x.Closed != nil {
+		return *x.Closed
+	}
+	return 0
+}
+
 var File_proto_model_proto protoreflect.FileDescriptor
 
 var file_proto_model_proto_rawDesc = []byte{
@@ -477,55 +617,79 @@ var file_proto_model_proto_rawDesc = []byte{
 	0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72,
 	0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x5a,
-	0x0a, 0x14, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x12,
-	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
-	0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x59, 0x0a, 0x15, 0x4c, 0x6f,
-	0x77, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68, 0x6f, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
-	0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05,
-	0x70, 0x72, 0x69, 0x63, 0x65, 0x22, 0x59, 0x0a, 0x15, 0x55, 0x70, 0x70, 0x65, 0x72, 0x54, 0x68,
-	0x72, 0x65, 0x73, 0x68, 0x6f, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16,
-	0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
-	0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72,
-	0x69, 0x63, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65,
-	0x22, 0x24, 0x0a, 0x08, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07,
-	0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73,
-	0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x22, 0x2d, 0x0a, 0x13, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73,
-	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a,
-	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75,
-	0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x35, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1d, 0x0a,
-	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x50, 0x6f,
-	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x36, 0x0a, 0x08,
-	0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06,
-	0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x61, 0x6d,
-	0x6f, 0x75, 0x6e, 0x74, 0x32, 0x9b, 0x02, 0x0a, 0x0e, 0x54, 0x72, 0x61, 0x64, 0x69, 0x6e, 0x67,
-	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x2f, 0x0a, 0x0c, 0x4f, 0x70, 0x65, 0x6e, 0x50,
-	0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x50, 0x6f,
-	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x31, 0x0a, 0x0d, 0x43, 0x6c, 0x6f, 0x73,
-	0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x15, 0x2e, 0x43, 0x6c, 0x6f, 0x73,
-	0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x33, 0x0a, 0x0e, 0x4c,
-	0x6f, 0x77, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68, 0x6f, 0x6c, 0x64, 0x12, 0x16, 0x2e,
-	0x4c, 0x6f, 0x77, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68, 0x6f, 0x6c, 0x64, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x33, 0x0a, 0x0e, 0x55, 0x70, 0x70, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68, 0x6f,
-	0x6c, 0x64, 0x12, 0x16, 0x2e, 0x55, 0x70, 0x70, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x73, 0x68,
-	0x6f, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3b, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x14, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69, 0x74,
-	0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x47, 0x65,
-	0x74, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x42, 0x03, 0x5a, 0x01, 0x2e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x3d,
+	0x0a, 0x14, 0x4f, 0x70, 0x65, 0x6e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69,
+	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x36, 0x0a,
+	0x14, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74,
+	0x69, 0x6f, 0x6e, 0x49, 0x44, 0x22, 0x47, 0x0a, 0x0f, 0x53, 0x74, 0x6f, 0x70, 0x4c, 0x6f, 0x73,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x6f,
+	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x22, 0x49,
+	0x0a, 0x11, 0x54, 0x61, 0x6b, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x49,
+	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x01, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x22, 0x38, 0x0a, 0x16, 0x47, 0x65, 0x74,
+	0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x49,
+	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x44, 0x22, 0x40, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69,
+	0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25,
+	0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x09, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x08, 0x70, 0x6f, 0x73,
+	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x31, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x41, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x55,
+	0x73, 0x65, 0x72, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x0a, 0x0a, 0x08, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xff, 0x01, 0x0a, 0x08, 0x50, 0x6f, 0x73, 0x69,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x6d, 0x6f, 0x75,
+	0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x06, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74,
+	0x12, 0x20, 0x0a, 0x09, 0x73, 0x74, 0x6f, 0x70, 0x5f, 0x6c, 0x6f, 0x73, 0x73, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x01, 0x48, 0x00, 0x52, 0x08, 0x73, 0x74, 0x6f, 0x70, 0x4c, 0x6f, 0x73, 0x73, 0x88,
+	0x01, 0x01, 0x12, 0x24, 0x0a, 0x0b, 0x74, 0x61, 0x6b, 0x65, 0x5f, 0x70, 0x72, 0x6f, 0x66, 0x69,
+	0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x01, 0x48, 0x01, 0x52, 0x0a, 0x74, 0x61, 0x6b, 0x65, 0x50,
+	0x72, 0x6f, 0x66, 0x69, 0x74, 0x88, 0x01, 0x01, 0x12, 0x1d, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x03, 0x48, 0x02, 0x52, 0x07, 0x63, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x64, 0x88, 0x01, 0x01, 0x12, 0x1b, 0x0a, 0x06, 0x63, 0x6c, 0x6f, 0x73, 0x65,
+	0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x03, 0x48, 0x03, 0x52, 0x06, 0x63, 0x6c, 0x6f, 0x73, 0x65,
+	0x64, 0x88, 0x01, 0x01, 0x42, 0x0c, 0x0a, 0x0a, 0x5f, 0x73, 0x74, 0x6f, 0x70, 0x5f, 0x6c, 0x6f,
+	0x73, 0x73, 0x42, 0x0e, 0x0a, 0x0c, 0x5f, 0x74, 0x61, 0x6b, 0x65, 0x5f, 0x70, 0x72, 0x6f, 0x66,
+	0x69, 0x74, 0x42, 0x0a, 0x0a, 0x08, 0x5f, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x09,
+	0x0a, 0x07, 0x5f, 0x63, 0x6c, 0x6f, 0x73, 0x65, 0x64, 0x32, 0xe5, 0x02, 0x0a, 0x0e, 0x54, 0x72,
+	0x61, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3b, 0x0a, 0x0c,
+	0x4f, 0x70, 0x65, 0x6e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x2e, 0x4f,
+	0x70, 0x65, 0x6e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x15, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x31, 0x0a, 0x0d, 0x43, 0x6c, 0x6f,
+	0x73, 0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x15, 0x2e, 0x43, 0x6c, 0x6f,
+	0x73, 0x65, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x44, 0x0a, 0x0f,
+	0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x12,
+	0x17, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49,
+	0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x6f,
+	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x47, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x6f, 0x73,
+	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x18, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x19, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x27, 0x0a, 0x08, 0x53,
+	0x74, 0x6f, 0x70, 0x4c, 0x6f, 0x73, 0x73, 0x12, 0x10, 0x2e, 0x53, 0x74, 0x6f, 0x70, 0x4c, 0x6f,
+	0x73, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2b, 0x0a, 0x0a, 0x54, 0x61, 0x6b, 0x65, 0x50, 0x72, 0x6f, 0x66,
+	0x69, 0x74, 0x12, 0x12, 0x2e, 0x54, 0x61, 0x6b, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x74, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x42, 0x03, 0x5a, 0x01, 0x2e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -540,34 +704,41 @@ func file_proto_model_proto_rawDescGZIP() []byte {
 	return file_proto_model_proto_rawDescData
 }
 
-var file_proto_model_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_proto_model_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_proto_model_proto_goTypes = []interface{}{
-	(*OpenPositionRequest)(nil),   // 0: OpenPositionRequest
-	(*ClosePositionRequest)(nil),  // 1: ClosePositionRequest
-	(*LowerThresholdRequest)(nil), // 2: LowerThresholdRequest
-	(*UpperThresholdRequest)(nil), // 3: UpperThresholdRequest
-	(*Response)(nil),              // 4: Response
-	(*GetPositionsRequest)(nil),   // 5: GetPositionsRequest
-	(*GetPositionsResponse)(nil),  // 6: GetPositionsResponse
-	(*Position)(nil),              // 7: Position
+	(*OpenPositionRequest)(nil),      // 0: OpenPositionRequest
+	(*OpenPositionResponse)(nil),     // 1: OpenPositionResponse
+	(*ClosePositionRequest)(nil),     // 2: ClosePositionRequest
+	(*StopLossRequest)(nil),          // 3: StopLossRequest
+	(*TakeProfitRequest)(nil),        // 4: TakeProfitRequest
+	(*GetPositionByIDRequest)(nil),   // 5: GetPositionByIDRequest
+	(*GetPositionByIDResponse)(nil),  // 6: GetPositionByIDResponse
+	(*GetUserPositionsRequest)(nil),  // 7: GetUserPositionsRequest
+	(*GetUserPositionsResponse)(nil), // 8: GetUserPositionsResponse
+	(*Response)(nil),                 // 9: Response
+	(*Position)(nil),                 // 10: Position
 }
 var file_proto_model_proto_depIdxs = []int32{
-	7, // 0: GetPositionsResponse.data:type_name -> Position
-	0, // 1: TradingService.OpenPosition:input_type -> OpenPositionRequest
-	1, // 2: TradingService.ClosePosition:input_type -> ClosePositionRequest
-	2, // 3: TradingService.LowerThreshold:input_type -> LowerThresholdRequest
-	3, // 4: TradingService.UpperThreshold:input_type -> UpperThresholdRequest
-	5, // 5: TradingService.GetPositions:input_type -> GetPositionsRequest
-	4, // 6: TradingService.OpenPosition:output_type -> Response
-	4, // 7: TradingService.ClosePosition:output_type -> Response
-	4, // 8: TradingService.LowerThreshold:output_type -> Response
-	4, // 9: TradingService.UpperThreshold:output_type -> Response
-	6, // 10: TradingService.GetPositions:output_type -> GetPositionsResponse
-	6, // [6:11] is the sub-list for method output_type
-	1, // [1:6] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	10, // 0: OpenPositionResponse.position:type_name -> Position
+	10, // 1: GetPositionByIDResponse.position:type_name -> Position
+	10, // 2: GetUserPositionsResponse.position:type_name -> Position
+	0,  // 3: TradingService.OpenPosition:input_type -> OpenPositionRequest
+	2,  // 4: TradingService.ClosePosition:input_type -> ClosePositionRequest
+	5,  // 5: TradingService.GetPositionByID:input_type -> GetPositionByIDRequest
+	7,  // 6: TradingService.GetUserPositions:input_type -> GetUserPositionsRequest
+	3,  // 7: TradingService.StopLoss:input_type -> StopLossRequest
+	4,  // 8: TradingService.TakeProfit:input_type -> TakeProfitRequest
+	1,  // 9: TradingService.OpenPosition:output_type -> OpenPositionResponse
+	9,  // 10: TradingService.ClosePosition:output_type -> Response
+	6,  // 11: TradingService.GetPositionByID:output_type -> GetPositionByIDResponse
+	8,  // 12: TradingService.GetUserPositions:output_type -> GetUserPositionsResponse
+	9,  // 13: TradingService.StopLoss:output_type -> Response
+	9,  // 14: TradingService.TakeProfit:output_type -> Response
+	9,  // [9:15] is the sub-list for method output_type
+	3,  // [3:9] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_model_proto_init() }
@@ -589,7 +760,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClosePositionRequest); i {
+			switch v := v.(*OpenPositionResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -601,7 +772,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LowerThresholdRequest); i {
+			switch v := v.(*ClosePositionRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -613,7 +784,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpperThresholdRequest); i {
+			switch v := v.(*StopLossRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -625,7 +796,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Response); i {
+			switch v := v.(*TakeProfitRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -637,7 +808,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetPositionsRequest); i {
+			switch v := v.(*GetPositionByIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -649,7 +820,7 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetPositionsResponse); i {
+			switch v := v.(*GetPositionByIDResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -661,6 +832,42 @@ func file_proto_model_proto_init() {
 			}
 		}
 		file_proto_model_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserPositionsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_model_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUserPositionsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_model_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Response); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_model_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Position); i {
 			case 0:
 				return &v.state
@@ -673,13 +880,14 @@ func file_proto_model_proto_init() {
 			}
 		}
 	}
+	file_proto_model_proto_msgTypes[10].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_model_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
