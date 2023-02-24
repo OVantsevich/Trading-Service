@@ -1,4 +1,4 @@
-module Trading-Service
+module github.com/OVantsevich/Trading-Service
 
 go 1.19
 

@@ -5,8 +5,8 @@ import (
 	"context"
 	"time"
 
-	"Trading-Service/internal/model"
-	pr "Trading-Service/proto"
+	"github.com/OVantsevich/Trading-Service/internal/model"
+	pr "github.com/OVantsevich/Trading-Service/proto"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"

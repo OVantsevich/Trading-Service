@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"Trading-Service/internal/model"
+	"github.com/OVantsevich/Trading-Service/internal/model"
 
 	psProto "github.com/OVantsevich/Price-Service/proto"
 )

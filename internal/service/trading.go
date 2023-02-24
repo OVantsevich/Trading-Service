@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"Trading-Service/internal/model"
-	"Trading-Service/internal/repository"
+	"github.com/OVantsevich/Trading-Service/internal/model"
+	"github.com/OVantsevich/Trading-Service/internal/repository"
 
 	"github.com/sirupsen/logrus"
 )

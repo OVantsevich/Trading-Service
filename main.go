@@ -2,15 +2,15 @@
 package main
 
 import (
-	"Trading-Service/internal/handler"
 	"context"
 	"fmt"
 	"net"
 
-	"Trading-Service/internal/config"
-	"Trading-Service/internal/repository"
-	"Trading-Service/internal/service"
-	pr "Trading-Service/proto"
+	"github.com/OVantsevich/Trading-Service/internal/config"
+	"github.com/OVantsevich/Trading-Service/internal/handler"
+	"github.com/OVantsevich/Trading-Service/internal/repository"
+	"github.com/OVantsevich/Trading-Service/internal/service"
+	pr "github.com/OVantsevich/Trading-Service/proto"
 
 	pasProto "github.com/OVantsevich/Payment-Service/proto"
 	prsProto "github.com/OVantsevich/Price-Service/proto"

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"Trading-Service/internal/model"
+	"github.com/OVantsevich/Trading-Service/internal/model"
 
 	"github.com/jackc/pgx/v5"
 )

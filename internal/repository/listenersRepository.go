@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"Trading-Service/internal/model"
+	"github.com/OVantsevich/Trading-Service/internal/model"
 )
 
 // ListenersRepository listeners repository
