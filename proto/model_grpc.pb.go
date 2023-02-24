@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: proto/model.proto
 
-package __
+package proto
 
 import (
 	context "context"
@@ -40,7 +40,7 @@ func NewTradingServiceClient(cc grpc.ClientConnInterface) TradingServiceClient {
 
 func (c *tradingServiceClient) OpenPosition(ctx context.Context, in *OpenPositionRequest, opts ...grpc.CallOption) (*OpenPositionResponse, error) {
 	out := new(OpenPositionResponse)
-	err := c.cc.Invoke(ctx, "/TradingService/OpenPosition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/OpenPosition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *tradingServiceClient) OpenPosition(ctx context.Context, in *OpenPositio
 
 func (c *tradingServiceClient) ClosePosition(ctx context.Context, in *ClosePositionRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/TradingService/ClosePosition", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/ClosePosition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *tradingServiceClient) ClosePosition(ctx context.Context, in *ClosePosit
 
 func (c *tradingServiceClient) GetPositionByID(ctx context.Context, in *GetPositionByIDRequest, opts ...grpc.CallOption) (*GetPositionByIDResponse, error) {
 	out := new(GetPositionByIDResponse)
-	err := c.cc.Invoke(ctx, "/TradingService/GetPositionByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/GetPositionByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *tradingServiceClient) GetPositionByID(ctx context.Context, in *GetPosit
 
 func (c *tradingServiceClient) GetUserPositions(ctx context.Context, in *GetUserPositionsRequest, opts ...grpc.CallOption) (*GetUserPositionsResponse, error) {
 	out := new(GetUserPositionsResponse)
-	err := c.cc.Invoke(ctx, "/TradingService/GetUserPositions", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/GetUserPositions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *tradingServiceClient) GetUserPositions(ctx context.Context, in *GetUser
 
 func (c *tradingServiceClient) StopLoss(ctx context.Context, in *StopLossRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/TradingService/StopLoss", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/StopLoss", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (c *tradingServiceClient) StopLoss(ctx context.Context, in *StopLossRequest
 
 func (c *tradingServiceClient) TakeProfit(ctx context.Context, in *TakeProfitRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/TradingService/TakeProfit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/tradingservice_proto.TradingService/TakeProfit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func _TradingService_OpenPosition_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/OpenPosition",
+		FullMethod: "/tradingservice_proto.TradingService/OpenPosition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).OpenPosition(ctx, req.(*OpenPositionRequest))
@@ -168,7 +168,7 @@ func _TradingService_ClosePosition_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/ClosePosition",
+		FullMethod: "/tradingservice_proto.TradingService/ClosePosition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).ClosePosition(ctx, req.(*ClosePositionRequest))
@@ -186,7 +186,7 @@ func _TradingService_GetPositionByID_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/GetPositionByID",
+		FullMethod: "/tradingservice_proto.TradingService/GetPositionByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).GetPositionByID(ctx, req.(*GetPositionByIDRequest))
@@ -204,7 +204,7 @@ func _TradingService_GetUserPositions_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/GetUserPositions",
+		FullMethod: "/tradingservice_proto.TradingService/GetUserPositions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).GetUserPositions(ctx, req.(*GetUserPositionsRequest))
@@ -222,7 +222,7 @@ func _TradingService_StopLoss_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/StopLoss",
+		FullMethod: "/tradingservice_proto.TradingService/StopLoss",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).StopLoss(ctx, req.(*StopLossRequest))
@@ -240,7 +240,7 @@ func _TradingService_TakeProfit_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TradingService/TakeProfit",
+		FullMethod: "/tradingservice_proto.TradingService/TakeProfit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TradingServiceServer).TakeProfit(ctx, req.(*TakeProfitRequest))
@@ -252,7 +252,7 @@ func _TradingService_TakeProfit_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TradingService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "TradingService",
+	ServiceName: "tradingservice_proto.TradingService",
 	HandlerType: (*TradingServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
