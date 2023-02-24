@@ -75,6 +75,13 @@ type Trading struct {
 	transactor repository.PgxTransactor
 }
 
+// NewTrading constructor
+func NewTrading(ctx context.Context, lr ListenersRepository, pr PositionsRepository, pp PriceService, ps PaymentService, trx repository.PgxTransactor) *Trading {
+	prc := &Trading{positionsRepository: pr, priceService: pp, paymentService: ps, listenersRepository: lr, transactor: trx}
+	prc.startListener(ctx, getPricesListener).startListener(ctx, getNotificationListener).startListener(ctx, closePositionListener)
+	return prc
+}
+
 // CreatePosition open new position
 func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) (*model.Position, error) {
 	var pos *model.Position
@@ -185,13 +192,6 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed, 
 	}
 
 	return nil
-}
-
-// NewPrices constructor
-func NewPrices(ctx context.Context, lr ListenersRepository, pr PositionsRepository, pp PriceService, ps PaymentService, trx repository.PgxTransactor) *Trading {
-	prc := &Trading{positionsRepository: pr, priceService: pp, paymentService: ps, listenersRepository: lr, transactor: trx}
-	prc.startListener(ctx, getPricesListener).startListener(ctx, getNotificationListener).startListener(ctx, closePositionListener)
-	return prc
 }
 
 func (t *Trading) startListener(ctx context.Context, listener func(context.Context, *Trading, chan error)) *Trading {
