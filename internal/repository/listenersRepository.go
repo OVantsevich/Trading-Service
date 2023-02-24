@@ -9,19 +9,25 @@ import (
 	"github.com/OVantsevich/Trading-Service/internal/model"
 )
 
+// stopLoss stop loss
+const stopLoss = "stop_loss"
+
+// takeProfit take profit
+const takeProfit = "take_profit"
+
 // ListenersRepository listeners repository
 type ListenersRepository struct {
 	mu              sync.RWMutex
 	closedPositions chan *model.Notification
-	listenersTP     map[string]map[string]chan float64
-	listenersSL     map[string]map[string]chan float64
+	listenersTP     map[string]map[string]chan *model.Price
+	listenersSL     map[string]map[string]chan *model.Price
 }
 
 // NewListenersRepository constructor
 func NewListenersRepository() *ListenersRepository {
 	cpChan := make(chan *model.Notification)
-	listenersTP := make(map[string]map[string]chan float64)
-	listenersSL := make(map[string]map[string]chan float64)
+	listenersTP := make(map[string]map[string]chan *model.Price)
+	listenersSL := make(map[string]map[string]chan *model.Price)
 	return &ListenersRepository{
 		closedPositions: cpChan,
 		listenersTP:     listenersTP,
@@ -34,14 +40,21 @@ func NewListenersRepository() *ListenersRepository {
 //nolint:dupl //just because
 func (l *ListenersRepository) CreateListenerTP(ctx context.Context, notify *model.Notification) error {
 	l.mu.Lock()
-	lis := l.listenersTP[notify.Name]
-	_, ok := lis[notify.ID]
+	lis, ok := l.listenersTP[notify.Name]
+	if !ok {
+		l.listenersTP[notify.Name] = make(map[string]chan *model.Price)
+	}
+	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
 		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
-	channel := make(chan float64)
-	go listenerTP(ctx, channel, l.closedPositions, notify)
+	channel := make(chan *model.Price, 1)
+	sendNotify := *notify
+	sendNotify.Type = takeProfit
+	go listener(ctx, channel, l.closedPositions, &sendNotify, func(price *model.Price, notification *model.Notification) bool {
+		return price.SellingPrice >= notification.Price
+	})
 	l.listenersTP[notify.Name][notify.ID] = channel
 	l.mu.Unlock()
 	return nil
@@ -52,14 +65,21 @@ func (l *ListenersRepository) CreateListenerTP(ctx context.Context, notify *mode
 //nolint:dupl //just because
 func (l *ListenersRepository) CreateListenerSL(ctx context.Context, notify *model.Notification) error {
 	l.mu.Lock()
-	lis := l.listenersSL[notify.Name]
-	_, ok := lis[notify.ID]
+	lis, ok := l.listenersSL[notify.Name]
+	if !ok {
+		l.listenersSL[notify.Name] = make(map[string]chan *model.Price)
+	}
+	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
 		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
-	channel := make(chan float64)
-	go listenerSL(ctx, channel, l.closedPositions, notify)
+	channel := make(chan *model.Price, 1)
+	sendNotify := *notify
+	sendNotify.Type = stopLoss
+	go listener(ctx, channel, l.closedPositions, &sendNotify, func(price *model.Price, notification *model.Notification) bool {
+		return price.SellingPrice <= notification.Price
+	})
 	l.listenersSL[notify.Name][notify.ID] = channel
 	l.mu.Unlock()
 	return nil
@@ -100,10 +120,10 @@ func (l *ListenersRepository) SendPrices(prices []*model.Price) {
 	l.mu.RLock()
 	for _, p := range prices {
 		for _, lis := range l.listenersSL[p.Name] {
-			lis <- p.SellingPrice
+			lis <- p
 		}
 		for _, lis := range l.listenersTP[p.Name] {
-			lis <- p.SellingPrice
+			lis <- p
 		}
 	}
 	l.mu.RUnlock()
@@ -114,33 +134,19 @@ func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notific
 	select {
 	case <-ctx.Done():
 		return nil, fmt.Errorf("listenersRepository - ClosePosition: context canceld")
-	case positionID := <-l.closedPositions:
-		return positionID, nil
-	}
-}
-
-func listenerTP(ctx context.Context, cin chan float64, cout chan *model.Notification, notify *model.Notification) {
-	var price float64
-	var ok bool
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case price, ok = <-cin:
-			if !ok {
-				return
-			}
-			if price <= notify.Price {
-				notify.Price = price
-				cout <- notify
-				return
-			}
+	case notify := <-l.closedPositions:
+		switch notify.Type {
+		case takeProfit:
+			l.RemoveListenerTP(notify)
+		case stopLoss:
+			l.RemoveListenerSL(notify)
 		}
+		return notify, nil
 	}
 }
 
-func listenerSL(ctx context.Context, cin chan float64, cout chan *model.Notification, notify *model.Notification) {
-	var price float64
+func listener(ctx context.Context, cin chan *model.Price, cout chan *model.Notification, notify *model.Notification, comp func(price *model.Price, notification *model.Notification) bool) {
+	var price *model.Price
 	var ok bool
 	for {
 		select {
@@ -150,8 +156,8 @@ func listenerSL(ctx context.Context, cin chan float64, cout chan *model.Notifica
 			if !ok {
 				return
 			}
-			if price >= notify.Price {
-				notify.Price = price
+			if comp(price, notify) {
+				notify.Price = price.SellingPrice
 				cout <- notify
 				return
 			}
