@@ -14,17 +14,17 @@ func TestListenersRepository_CreateListener(t *testing.T) {
 		Name: "testName",
 	}
 
-	err := listenersRepository.CreateListenerSL(ctx, notify)
+	err := testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.Error(t, err)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.Error(t, err)
-	err = listenersRepository.RemoveListenerSL(notify)
+	err = testListenersRepository.RemoveListenerSL(notify)
 	require.NoError(t, err)
-	err = listenersRepository.RemoveListenerTP(notify)
+	err = testListenersRepository.RemoveListenerTP(notify)
 	require.NoError(t, err)
 }
 
@@ -35,29 +35,29 @@ func TestListenersRepository_RemoveListener(t *testing.T) {
 		Name: "testName",
 	}
 
-	err := listenersRepository.CreateListenerSL(ctx, notify)
+	err := testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
-	require.NoError(t, err)
-
-	err = listenersRepository.RemoveListenerSL(notify)
-	require.NoError(t, err)
-	err = listenersRepository.RemoveListenerTP(notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
 
-	err = listenersRepository.RemoveListenerSL(notify)
+	err = testListenersRepository.RemoveListenerSL(notify)
+	require.NoError(t, err)
+	err = testListenersRepository.RemoveListenerTP(notify)
+	require.NoError(t, err)
+
+	err = testListenersRepository.RemoveListenerSL(notify)
 	require.Error(t, err)
-	err = listenersRepository.RemoveListenerTP(notify)
+	err = testListenersRepository.RemoveListenerTP(notify)
 	require.Error(t, err)
 
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
 
-	err = listenersRepository.RemoveListenerSL(notify)
+	err = testListenersRepository.RemoveListenerSL(notify)
 	require.NoError(t, err)
-	err = listenersRepository.RemoveListenerTP(notify)
+	err = testListenersRepository.RemoveListenerTP(notify)
 	require.NoError(t, err)
 }
 
@@ -69,9 +69,9 @@ func TestListenersRepository_SendPrices(t *testing.T) {
 		Price: 100,
 	}
 
-	err := listenersRepository.CreateListenerSL(ctx, notify)
+	err := testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
 
 	prices := []*model.Price{
@@ -81,11 +81,11 @@ func TestListenersRepository_SendPrices(t *testing.T) {
 		},
 	}
 
-	listenersRepository.SendPrices(prices)
-	_, _ = listenersRepository.ClosePosition(ctx)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	testListenersRepository.SendPrices(prices)
+	_, _ = testListenersRepository.ClosePosition(ctx)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.Error(t, err)
 
 	prices = []*model.Price{
@@ -95,37 +95,37 @@ func TestListenersRepository_SendPrices(t *testing.T) {
 		},
 	}
 
-	listenersRepository.SendPrices(prices)
-	_, _ = listenersRepository.ClosePosition(ctx)
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	testListenersRepository.SendPrices(prices)
+	_, _ = testListenersRepository.ClosePosition(ctx)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.Error(t, err)
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
 
-	listenersRepository.SendPrices([]*model.Price{
+	testListenersRepository.SendPrices([]*model.Price{
 		&model.Price{
 			Name:         "testName",
 			SellingPrice: 101,
 		},
 	})
 
-	listenersRepository.SendPrices([]*model.Price{
+	testListenersRepository.SendPrices([]*model.Price{
 		&model.Price{
 			Name:         "testName",
 			SellingPrice: 11,
 		},
 	})
 
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.Error(t, err)
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.Error(t, err)
 
-	_, _ = listenersRepository.ClosePosition(ctx)
-	_, _ = listenersRepository.ClosePosition(ctx)
+	_, _ = testListenersRepository.ClosePosition(ctx)
+	_, _ = testListenersRepository.ClosePosition(ctx)
 
-	err = listenersRepository.CreateListenerTP(ctx, notify)
+	err = testListenersRepository.CreateListenerTP(ctx, notify)
 	require.NoError(t, err)
-	err = listenersRepository.CreateListenerSL(ctx, notify)
+	err = testListenersRepository.CreateListenerSL(ctx, notify)
 	require.NoError(t, err)
 }

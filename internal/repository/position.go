@@ -39,7 +39,7 @@ func NewPositionRepository(ctx context.Context, p PgxWithinTransactionRunner) (*
 // CreatePosition create position
 func (p *Position) CreatePosition(ctx context.Context, position *model.Position) (*model.Position, error) {
 	row := p.QueryRow(ctx,
-		`insert into positions (id, user, name, amount, created, updated) values ($1, $2, $3, $4, $5, $6) returning id;`,
+		`insert into positions (id, "user", "name", amount, created, updated) values ($1, $2, $3, $4, $5, $6) returning id;`,
 		position.ID, position.User, position.Name, position.Amount, position.Created, position.Updated)
 	err := row.Scan(&position.ID)
 	if err != nil {
@@ -52,10 +52,9 @@ func (p *Position) CreatePosition(ctx context.Context, position *model.Position)
 // GetPositionByID get Position by id
 func (p *Position) GetPositionByID(ctx context.Context, positionID string) (*model.Position, error) {
 	pos := &model.Position{}
-	row := p.QueryRow(ctx, `select id, user, name, amount, stop_loss, take_profit, closed, created
+	row := p.QueryRow(ctx, `select id, "user", "name", amount, stop_loss, take_profit, updated, created
 									from positions where id = $1`, positionID)
-	err := row.Scan(
-		&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Created, &pos.Created)
+	err := row.Scan(&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Updated, &pos.Created)
 	if err != nil {
 		return nil, fmt.Errorf("position - GetPositionByLogin - Scan: %w", err)
 	}
@@ -65,8 +64,8 @@ func (p *Position) GetPositionByID(ctx context.Context, positionID string) (*mod
 
 // GetUserPositions get positions by user id
 func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*model.Position, error) {
-	rows, err := p.Query(ctx, `select id, name, amount, stop_loss, take_profit, closed, created
-									from positions where user = $1`, userID)
+	rows, err := p.Query(ctx, `select id, "name", amount, stop_loss, take_profit, updated, created
+									from positions where "user" = $1`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("position - GetUserPositions - Query: %w", err)
 	}
@@ -76,7 +75,7 @@ func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*mode
 		pos := &model.Position{
 			User: userID,
 		}
-		err = rows.Scan(&pos.ID, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Closed, &pos.Created)
+		err = rows.Scan(&pos.ID, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.Updated, &pos.Created)
 		if err != nil {
 			return nil, fmt.Errorf("position - GetUserPositions - Scan: %w", err)
 		}
@@ -94,7 +93,7 @@ func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*mode
 
 // UpdatePosition update position excluding thresholds
 func (p *Position) UpdatePosition(ctx context.Context, position *model.Position) error {
-	_, err := p.Exec(ctx, `update positions set amount=$1, updated=$2 where id=$3 and closed is not null;`,
+	_, err := p.Exec(ctx, `update positions set amount=$1, updated=$2 where id=$3 and closed is null;`,
 		position.Amount, position.Updated, position.ID)
 	if err != nil {
 		return fmt.Errorf("position - UpdatePosition - Exec: %w", err)
@@ -105,7 +104,7 @@ func (p *Position) UpdatePosition(ctx context.Context, position *model.Position)
 
 // SetStopLoss set stop loss
 func (p *Position) SetStopLoss(ctx context.Context, id string, stopLoss float64, updated time.Time) error {
-	_, err := p.Exec(ctx, `update positions set stop_loss=$1, updated=$2 where id=$3 and deleted is not null;`,
+	_, err := p.Exec(ctx, `update positions set stop_loss=$1, updated=$2 where id=$3 and closed is null;`,
 		stopLoss, updated, id)
 	if err != nil {
 		return fmt.Errorf("position - SetStopLoss - Exec: %w", err)
@@ -116,7 +115,7 @@ func (p *Position) SetStopLoss(ctx context.Context, id string, stopLoss float64,
 
 // SetTakeProfit set take profit
 func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit float64, updated time.Time) error {
-	_, err := p.Exec(ctx, `update positions set take_profit=$1, updated=$2 where id=$3 and deleted is not null;`,
+	_, err := p.Exec(ctx, `update positions set take_profit=$1, updated=$2 where id=$3 and closed is null;`,
 		takeProfit, updated, id)
 	if err != nil {
 		return fmt.Errorf("position - SetTakeProfit - Exec: %w", err)
@@ -128,7 +127,7 @@ func (p *Position) SetTakeProfit(ctx context.Context, id string, takeProfit floa
 // ClosePosition close position
 func (p *Position) ClosePosition(ctx context.Context, id string, closed, updated time.Time) (*model.Position, error) {
 	pos := &model.Position{}
-	row := p.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 returning amount, name, user;",
+	row := p.QueryRow(ctx, "update positions set closed=$1, updated=$2 where id=$3 and closed is null returning amount, name, user;",
 		closed, updated, id)
 	err := row.Scan(&pos.Amount, &pos.Name, &pos.User)
 	if err != nil {
@@ -146,7 +145,9 @@ func (p *Position) GetNotification(ctx context.Context) (*model.Notification, er
 	}
 
 	notify := &model.Notification{}
-	err = json.Unmarshal([]byte(msg.Payload), &notify)
+	t.Format(time.RFC3339)
+	json.
+		err = json.Unmarshal([]byte(msg.Payload), &notify)
 	if err != nil {
 		return nil, fmt.Errorf("positions - GetNotification - Unmarshal: %w", err)
 	}

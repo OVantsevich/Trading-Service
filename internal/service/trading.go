@@ -4,6 +4,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/OVantsevich/Trading-Service/internal/model"
@@ -87,6 +88,7 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 	var pos *model.Position
 	err := t.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
 		var trxErr error
+		position.ID = uuid.New().String()
 		pos, trxErr = t.positionsRepository.CreatePosition(ctx, position)
 		if trxErr != nil {
 			return fmt.Errorf("trading - CreatePosition - CreatePosition: %w", trxErr)

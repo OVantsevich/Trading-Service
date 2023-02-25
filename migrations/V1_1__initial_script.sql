@@ -1,36 +1,26 @@
-create table if not exists position
+create table if not exists positions
 (
     id          varchar(200)
-        constraint Position_pk
+        constraint Positions_pk
             primary key,
-    user        varchar(200)                              not null,
-    name        varchar(50)                               not null,
-    amount      double precision                          not null,
-    stop_loss   double precision,
-    take_profit double precision,
+    "user"      varchar(200)                                  not null,
+    "name"      varchar(50)                                   not null,
+    amount      double precision                              not null,
+    stop_loss   double precision default 0                    not null,
+    take_profit double precision default 0                    not null,
     closed      timestamp(6),
-    created     timestamp(6) default CURRENT_TIMESTAMP(6) not null,
-    updated     timestamp(6) default CURRENT_TIMESTAMP(6) not null
+    created     timestamp(6)     default CURRENT_TIMESTAMP(6) not null,
+    updated     timestamp(6)     default CURRENT_TIMESTAMP(6) not null
 );
 
-alter table position
+alter table positions
     owner to postgres;
 
-create unique index if not exists position_user_name_closed_uindex
-    on position (user, name, closed);
-
-CREATE TRIGGER stop_loss
-    AFTER UPDATE OF stop_loss, closed
-    ON position
-EXECUTE FUNCTION notify();
-
-CREATE TRIGGER take_profit
-    AFTER UPDATE OF take_profit, closed
-    ON position
-EXECUTE FUNCTION notify();
+create UNIQUE index if not exists positions_user_name_closed_uindex
+    on positions ("user", "name", closed) NULLS NOT DISTINCT;
 
 CREATE OR REPLACE FUNCTION notify() RETURNS TRIGGER AS
-$FN$
+$BODY$
 DECLARE
     payload jsonb;
 BEGIN
@@ -39,17 +29,29 @@ BEGIN
             'name', to_jsonb(OLD.name),
             'user', to_jsonb(OLD.user),
             'type', to_jsonb(TG_NAME),
-            'closed', to_jsonb(NEW.closed),
+            'closed', to_jsonb(NEW.closed::timestamp(6))
         );
     IF TG_NAME = 'stop_loss' THEN
-        payload = jsonb_set(payload, 'price', OLD.stop_loss, true);
+        payload = jsonb_set(payload, '{price}', to_jsonb(OLD.stop_loss), true);
     END IF;
     IF TG_NAME = 'take_profit' THEN
-        payload = jsonb_set(payload, 'price', OLD.take_profit, true);
+        payload = jsonb_set(payload, '{price}', to_jsonb(OLD.take_profit), true);
     END IF;
 
     PERFORM pg_notify('thresholds', payload::TEXT);
 
     RETURN NEW;
-END;
-$FN$ LANGUAGE plpgsql;
+END ;
+$BODY$ LANGUAGE plpgsql;
+
+CREATE TRIGGER stop_loss
+    AFTER UPDATE OF stop_loss, closed
+    ON positions
+    FOR EACH ROW
+EXECUTE FUNCTION notify();
+
+CREATE TRIGGER take_profit
+    AFTER UPDATE OF take_profit, closed
+    ON positions
+    FOR EACH ROW
+EXECUTE FUNCTION notify();

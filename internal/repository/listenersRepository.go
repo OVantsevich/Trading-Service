@@ -47,7 +47,7 @@ func (l *ListenersRepository) CreateListenerTP(ctx context.Context, notify *mode
 	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
-		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
+		return fmt.Errorf("testListenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
 	channel := make(chan *model.Price, 1)
 	sendNotify := *notify
@@ -72,7 +72,7 @@ func (l *ListenersRepository) CreateListenerSL(ctx context.Context, notify *mode
 	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
-		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
+		return fmt.Errorf("testListenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
 	channel := make(chan *model.Price, 1)
 	sendNotify := *notify
@@ -92,7 +92,7 @@ func (l *ListenersRepository) RemoveListenerTP(notify *model.Notification) error
 	channel, ok := lis[notify.ID]
 	if !ok {
 		l.mu.Unlock()
-		return fmt.Errorf("listenersRepository - RemoveListenerTP: listener with this name and positionID does't exist")
+		return fmt.Errorf("testListenersRepository - RemoveListenerTP: listener with this name and positionID does't exist")
 	}
 	close(channel)
 	delete(l.listenersTP[notify.Name], notify.ID)
@@ -107,7 +107,7 @@ func (l *ListenersRepository) RemoveListenerSL(notify *model.Notification) error
 	channel, ok := lis[notify.ID]
 	if !ok {
 		l.mu.Unlock()
-		return fmt.Errorf("listenersRepository - RemoveListenerSL: listener with this name and positionID does't exist")
+		return fmt.Errorf("testListenersRepository - RemoveListenerSL: listener with this name and positionID does't exist")
 	}
 	close(channel)
 	delete(l.listenersSL[notify.Name], notify.ID)
@@ -133,7 +133,7 @@ func (l *ListenersRepository) SendPrices(prices []*model.Price) {
 func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notification, error) {
 	select {
 	case <-ctx.Done():
-		return nil, fmt.Errorf("listenersRepository - ClosePosition: context canceld")
+		return nil, fmt.Errorf("testListenersRepository - ClosePosition: context canceld")
 	case notify := <-l.closedPositions:
 		switch notify.Type {
 		case takeProfit:
