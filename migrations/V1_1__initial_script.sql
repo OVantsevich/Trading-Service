@@ -8,7 +8,7 @@ create table if not exists positions
     amount      double precision                              not null,
     stop_loss   double precision default 0                    not null,
     take_profit double precision default 0                    not null,
-    closed      timestamp(6),
+    closed      bigint           default 0                    not null,
     created     timestamp(6)     default CURRENT_TIMESTAMP(6) not null,
     updated     timestamp(6)     default CURRENT_TIMESTAMP(6) not null
 );
@@ -17,7 +17,7 @@ alter table positions
     owner to postgres;
 
 create UNIQUE index if not exists positions_user_name_closed_uindex
-    on positions ("user", "name", closed) NULLS NOT DISTINCT;
+    on positions ("user", "name", closed);
 
 CREATE OR REPLACE FUNCTION notify() RETURNS TRIGGER AS
 $BODY$
@@ -29,7 +29,7 @@ BEGIN
             'name', to_jsonb(OLD.name),
             'user', to_jsonb(OLD.user),
             'type', to_jsonb(TG_NAME),
-            'closed', to_jsonb(NEW.closed::timestamp(6))
+            'closed', to_jsonb(NEW.closed)
         );
     IF TG_NAME = 'stop_loss' THEN
         payload = jsonb_set(payload, '{price}', to_jsonb(OLD.stop_loss), true);

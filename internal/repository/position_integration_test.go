@@ -17,8 +17,8 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 	ctx := context.Background()
 	var testData = []*model.Position{
 		{
-			ID:      "id",
-			User:    "user",
+			ID:      uuid.NewString(),
+			User:    uuid.NewString(),
 			Name:    "name",
 			Amount:  100,
 			Created: time.Now(),
@@ -38,19 +38,29 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 		_, err = testPositionRepository.CreatePosition(ctx, &wrongPos)
 		require.Error(t, err)
 
-		p.ID = "id"
-		closed, err := testPositionRepository.ClosePosition(ctx, p.ID, time.Now(), time.Now())
+		var closed *model.Position
+		closed, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
 		require.NoError(t, err)
 		require.Equal(t, closed.Amount, p.Amount)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now(), time.Now())
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
 		require.Error(t, err)
 
 		p.ID = uuid.New().String()
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
+		require.NoError(t, err)
+
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 	}
 }
@@ -60,8 +70,8 @@ func TestPosition_GetPositionByID(t *testing.T) {
 	ctx := context.Background()
 	var testData = []*model.Position{
 		{
-			ID:      "id",
-			User:    "user",
+			ID:      uuid.NewString(),
+			User:    uuid.NewString(),
 			Name:    "name",
 			Amount:  100,
 			Created: time.Now(),
@@ -83,6 +93,14 @@ func TestPosition_GetPositionByID(t *testing.T) {
 		wrongPos.ID = "wrongID"
 		_, err = testPositionRepository.GetPositionByID(ctx, wrongPos.ID)
 		require.Error(t, err)
+
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
+		require.NoError(t, err)
+
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 	}
 }
 
@@ -108,7 +126,17 @@ func TestPosition_GetUserPositions(t *testing.T) {
 
 	getById, err := testPositionRepository.GetUserPositions(ctx, testData[0].User)
 	require.NoError(t, err)
-	require.Equal(t, len(getById), len(testData))
+	require.Equal(t, len(testData), len(getById))
+
+	for _, p := range testData {
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		require.NoError(t, err)
+
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+	}
 }
 
 func TestPosition_SL_TP_GetNotification(t *testing.T) {
@@ -131,19 +159,31 @@ func TestPosition_SL_TP_GetNotification(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	cancelContext, cancel := context.WithCancel(ctx)
-	go func() {
-		time.Sleep(3)
-		cancel()
-	}()
-	res, err := testPositionRepository.GetNotification(cancelContext)
-	require.Error(t, err)
-	require.Equal(t, (*model.Notification)(nil), res)
+	for _, p := range testData {
+		cancelContext, cancel := context.WithCancel(ctx)
+		go func() {
+			time.Sleep(3)
+			cancel()
+		}()
+		res, err := testPositionRepository.GetNotification(cancelContext)
+		require.Error(t, err)
+		require.Equal(t, (*model.Notification)(nil), res)
 
-	_, err = testPositionRepository.ClosePosition(ctx, testData[0].ID, time.Now(), time.Now())
-	require.NoError(t, err)
-	res, err = testPositionRepository.GetNotification(ctx)
-	require.NoError(t, err)
-	require.Equal(t, testData[0].ID, res.ID)
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		require.NoError(t, err)
+		res, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		require.Equal(t, p.ID, res.ID)
+		res, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
+		require.Equal(t, p.ID, res.ID)
+		cancelContext, cancel = context.WithCancel(ctx)
+		go func() {
+			time.Sleep(time.Second)
+			cancel()
+		}()
+		res, err = testPositionRepository.GetNotification(cancelContext)
+		require.Error(t, err)
+	}
 
 }

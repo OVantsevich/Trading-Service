@@ -11,7 +11,7 @@ type Position struct {
 	Amount     float64   `json:"amount"`
 	StopLoss   float64   `json:"stop_loss"`
 	TakeProfit float64   `json:"take_profit"`
-	Closed     time.Time `json:"closed"`
+	Closed     int64     `json:"closed"`
 	Created    time.Time `json:"created"`
 	Updated    time.Time `json:"updated"`
 }

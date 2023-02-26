@@ -22,7 +22,7 @@ type TradingService interface {
 	GetUserPositions(ctx context.Context, userID string) ([]*model.Position, error)
 	SetStopLoss(ctx context.Context, positionID string, stopLoss float64, updated time.Time) error
 	SetTakeProfit(ctx context.Context, positionID string, takeProfit float64, updated time.Time) error
-	ClosePosition(ctx context.Context, positionID string, closed, updated time.Time) error
+	ClosePosition(ctx context.Context, positionID string, closed int64, updated time.Time) error
 }
 
 // Trading handler
@@ -56,7 +56,7 @@ func (t *Trading) OpenPosition(ctx context.Context, request *pr.OpenPositionRequ
 
 // ClosePosition close position
 func (t *Trading) ClosePosition(ctx context.Context, request *pr.ClosePositionRequest) (*pr.Response, error) {
-	err := t.service.ClosePosition(ctx, request.PositionID, time.Now(), time.Now())
+	err := t.service.ClosePosition(ctx, request.PositionID, time.Now().Unix(), time.Now())
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"PositionID": request.PositionID,
@@ -126,10 +126,6 @@ func positionToGRPC(pos *model.Position) *pr.Position {
 	if pos.TakeProfit != 0 {
 		prPos.TakeProfit = &pos.TakeProfit
 	}
-	if !pos.Closed.IsZero() {
-		closedUnix := pos.Closed.Unix()
-		prPos.Closed = &closedUnix
-	}
 	if !pos.Created.IsZero() {
 		createUnix := pos.Created.Unix()
 		prPos.Created = &createUnix
@@ -138,5 +134,6 @@ func positionToGRPC(pos *model.Position) *pr.Position {
 		Id:     pos.ID,
 		Name:   pos.Name,
 		Amount: pos.Amount,
+		Closed: &pos.Closed,
 	}
 }

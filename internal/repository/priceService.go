@@ -10,6 +10,9 @@ import (
 	psProto "github.com/OVantsevich/Price-Service/proto"
 )
 
+//go:generate mockery --name=PSC --case=underscore --output=./mocks
+type PSC = psProto.PriceServiceClient
+
 // PriceService entity
 type PriceService struct {
 	ctx    context.Context

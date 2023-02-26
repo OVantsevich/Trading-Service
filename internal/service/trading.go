@@ -29,7 +29,7 @@ type PositionsRepository interface {
 	UpdatePosition(ctx context.Context, position *model.Position) error
 	SetStopLoss(ctx context.Context, positionID string, stopLoss float64, updated time.Time) error
 	SetTakeProfit(ctx context.Context, positionID string, takeProfit float64, updated time.Time) error
-	ClosePosition(ctx context.Context, positionID string, closed, updated time.Time) (*model.Position, error)
+	ClosePosition(ctx context.Context, positionID string, closed int64, updated time.Time) (*model.Position, error)
 
 	GetNotification(ctx context.Context) (*model.Notification, error)
 }
@@ -160,7 +160,7 @@ func (t *Trading) SetTakeProfit(ctx context.Context, positionID string, takeProf
 }
 
 // ClosePosition close position
-func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed, updated time.Time) error {
+func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed int64, updated time.Time) error {
 	err := t.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
 		pos, trxErr := t.positionsRepository.ClosePosition(ctx, positionID, closed, updated)
 		if trxErr != nil {
@@ -239,7 +239,7 @@ func getNotificationListener(ctx context.Context, t *Trading, errChan chan error
 
 			switch notify.Type {
 			case takeProfit:
-				if notify.Closed != nil {
+				if notify.Closed != 0 {
 					err = t.listenersRepository.RemoveListenerTP(notify)
 					if err != nil {
 						errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerTP: %w", err)
@@ -256,7 +256,7 @@ func getNotificationListener(ctx context.Context, t *Trading, errChan chan error
 					errChan <- fmt.Errorf("trading - getNotificationListener - UpdateSubscription: %w", err)
 				}
 			case stopLoss:
-				if notify.Closed != nil {
+				if notify.Closed != 0 {
 					err = t.listenersRepository.RemoveListenerSL(notify)
 					if err != nil {
 						errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerSL: %w", err)
@@ -289,7 +289,7 @@ func closePositionListener(ctx context.Context, t *Trading, errChan chan error) 
 			}
 
 			err = t.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
-				pos, trxErr := t.positionsRepository.ClosePosition(ctx, notify.ID, time.Now(), time.Now())
+				pos, trxErr := t.positionsRepository.ClosePosition(ctx, notify.ID, time.Now().Unix(), time.Now())
 				if trxErr != nil {
 					trxErr = fmt.Errorf("trading - closePositionListener - ClosePosition: %w", trxErr)
 					return trxErr
