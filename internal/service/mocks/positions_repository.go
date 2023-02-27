@@ -68,20 +68,20 @@ func (_m *PositionsRepository) CreatePosition(ctx context.Context, position *mod
 	return r0, r1
 }
 
-// GetNotification provides a mock function with given fields: ctx
-func (_m *PositionsRepository) GetNotification(ctx context.Context) (*model.Notification, error) {
+// GetPosition provides a mock function with given fields: ctx
+func (_m *PositionsRepository) GetPosition(ctx context.Context) (*model.Position, error) {
 	ret := _m.Called(ctx)
 
-	var r0 *model.Notification
+	var r0 *model.Position
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*model.Notification, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (*model.Position, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *model.Notification); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) *model.Position); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Notification)
+			r0 = ret.Get(0).(*model.Position)
 		}
 	}
 

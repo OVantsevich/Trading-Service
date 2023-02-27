@@ -29,6 +29,8 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 	for _, p := range testData {
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.Error(t, err)
@@ -45,8 +47,6 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
-		_, err = testPositionRepository.GetNotification(ctx)
-		require.NoError(t, err)
 
 		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
 		require.Error(t, err)
@@ -54,12 +54,12 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 		p.ID = uuid.New().String()
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 
 		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
 		require.NoError(t, err)
 
-		_, err = testPositionRepository.GetNotification(ctx)
-		require.NoError(t, err)
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 	}
@@ -82,6 +82,8 @@ func TestPosition_GetPositionByID(t *testing.T) {
 	for _, p := range testData {
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 
 		getById, err := testPositionRepository.GetPositionByID(ctx, p.ID)
 		require.NoError(t, err)
@@ -97,8 +99,6 @@ func TestPosition_GetPositionByID(t *testing.T) {
 		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
 		require.NoError(t, err)
 
-		_, err = testPositionRepository.GetNotification(ctx)
-		require.NoError(t, err)
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 	}
@@ -122,6 +122,8 @@ func TestPosition_GetUserPositions(t *testing.T) {
 	for _, p := range testData {
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 	}
 
 	getById, err := testPositionRepository.GetUserPositions(ctx, testData[0].User)
@@ -134,12 +136,10 @@ func TestPosition_GetUserPositions(t *testing.T) {
 
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
-		_, err = testPositionRepository.GetNotification(ctx)
-		require.NoError(t, err)
 	}
 }
 
-func TestPosition_SL_TP_GetNotification(t *testing.T) {
+func TestPosition_SL_TP_GetPosition(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	var testData = make([]*model.Position, 10)
@@ -157,6 +157,8 @@ func TestPosition_SL_TP_GetNotification(t *testing.T) {
 	for _, p := range testData {
 		_, err = testPositionRepository.CreatePosition(ctx, p)
 		require.NoError(t, err)
+		_, err = testPositionRepository.GetNotification(ctx)
+		require.NoError(t, err)
 	}
 
 	for _, p := range testData {
@@ -171,9 +173,6 @@ func TestPosition_SL_TP_GetNotification(t *testing.T) {
 
 		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
 		require.NoError(t, err)
-		res, err = testPositionRepository.GetNotification(ctx)
-		require.NoError(t, err)
-		require.Equal(t, p.ID, res.ID)
 		res, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 		require.Equal(t, p.ID, res.ID)

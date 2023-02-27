@@ -15,19 +15,19 @@ type ListenersRepository struct {
 }
 
 // ClosePosition provides a mock function with given fields: ctx
-func (_m *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notification, error) {
+func (_m *ListenersRepository) ClosePosition(ctx context.Context) (*model.Position, error) {
 	ret := _m.Called(ctx)
 
-	var r0 *model.Notification
+	var r0 *model.Position
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*model.Notification, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (*model.Position, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *model.Notification); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) *model.Position); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Notification)
+			r0 = ret.Get(0).(*model.Position)
 		}
 	}
 
@@ -41,11 +41,11 @@ func (_m *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notifi
 }
 
 // CreateListenerSL provides a mock function with given fields: ctx, notify
-func (_m *ListenersRepository) CreateListenerSL(ctx context.Context, notify *model.Notification) error {
+func (_m *ListenersRepository) CreateListenerSL(ctx context.Context, notify *model.Position) error {
 	ret := _m.Called(ctx, notify)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.Notification) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Position) error); ok {
 		r0 = rf(ctx, notify)
 	} else {
 		r0 = ret.Error(0)
@@ -55,11 +55,11 @@ func (_m *ListenersRepository) CreateListenerSL(ctx context.Context, notify *mod
 }
 
 // CreateListenerTP provides a mock function with given fields: ctx, notify
-func (_m *ListenersRepository) CreateListenerTP(ctx context.Context, notify *model.Notification) error {
+func (_m *ListenersRepository) CreateListenerTP(ctx context.Context, notify *model.Position) error {
 	ret := _m.Called(ctx, notify)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.Notification) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.Position) error); ok {
 		r0 = rf(ctx, notify)
 	} else {
 		r0 = ret.Error(0)
@@ -69,11 +69,11 @@ func (_m *ListenersRepository) CreateListenerTP(ctx context.Context, notify *mod
 }
 
 // RemoveListenerSL provides a mock function with given fields: notify
-func (_m *ListenersRepository) RemoveListenerSL(notify *model.Notification) error {
+func (_m *ListenersRepository) RemoveListenerSL(notify *model.Position) error {
 	ret := _m.Called(notify)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Notification) error); ok {
+	if rf, ok := ret.Get(0).(func(*model.Position) error); ok {
 		r0 = rf(notify)
 	} else {
 		r0 = ret.Error(0)
@@ -83,11 +83,11 @@ func (_m *ListenersRepository) RemoveListenerSL(notify *model.Notification) erro
 }
 
 // RemoveListenerTP provides a mock function with given fields: notify
-func (_m *ListenersRepository) RemoveListenerTP(notify *model.Notification) error {
+func (_m *ListenersRepository) RemoveListenerTP(notify *model.Position) error {
 	ret := _m.Called(notify)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Notification) error); ok {
+	if rf, ok := ret.Get(0).(func(*model.Position) error); ok {
 		r0 = rf(notify)
 	} else {
 		r0 = ret.Error(0)

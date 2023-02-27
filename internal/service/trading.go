@@ -19,6 +19,12 @@ const stopLoss = "stop_loss"
 // takeProfit take profit
 const takeProfit = "take_profit"
 
+// closed
+const closed = "closed"
+
+// created
+const created = "created"
+
 // PositionsRepository positions repository
 //
 //go:generate mockery --name=PositionsRepository --case=underscore --output=./mocks
@@ -57,13 +63,13 @@ type PaymentService interface {
 //
 //go:generate mockery --name=ListenersRepository --case=underscore --output=./mocks
 type ListenersRepository interface {
-	CreateListenerTP(ctx context.Context, notify *model.Notification) error
-	CreateListenerSL(ctx context.Context, notify *model.Notification) error
-	RemoveListenerTP(notify *model.Notification) error
-	RemoveListenerSL(notify *model.Notification) error
+	CreateListenerTP(ctx context.Context, notify *model.Position) error
+	CreateListenerSL(ctx context.Context, notify *model.Position) error
+	RemoveListenerTP(notify *model.Position) error
+	RemoveListenerSL(notify *model.Position) error
 
 	SendPrices(prices []*model.Price)
-	ClosePosition(ctx context.Context) (*model.Notification, error)
+	ClosePosition(ctx context.Context) (*model.Position, error)
 }
 
 // Trading trading service
@@ -79,7 +85,7 @@ type Trading struct {
 // NewTrading constructor
 func NewTrading(ctx context.Context, lr ListenersRepository, pr PositionsRepository, pp PriceService, ps PaymentService, trx repository.PgxTransactor) *Trading {
 	prc := &Trading{positionsRepository: pr, priceService: pp, paymentService: ps, listenersRepository: lr, transactor: trx}
-	prc.startListener(ctx, getPricesListener).startListener(ctx, getNotificationListener).startListener(ctx, closePositionListener)
+	prc.startListener(ctx, getPricesListener).startListener(ctx, getPositionListener).startListener(ctx, closePositionListener)
 	return prc
 }
 
@@ -174,18 +180,37 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 		}
 		price := response[pos.Name]
 
-		sum := pos.Amount * price.SellingPrice
-		var accountID string
-		accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
-		if trxErr != nil {
-			trxErr = fmt.Errorf("trading - ClosePosition - GetAccount: %w", trxErr)
-			return trxErr
-		}
+		var sum float64
+		if pos.ShortPosition == 0.0 || pos.Amount*(pos.ShortPosition-price.SellingPrice) > 0 {
+			sum = pos.Amount * price.SellingPrice
 
-		trxErr = t.paymentService.IncreaseAmount(ctx, accountID, sum)
-		if trxErr != nil {
-			trxErr = fmt.Errorf("trading - ClosePosition - DecreaseAmount: %w", trxErr)
-			return trxErr
+			var accountID string
+			accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
+			if trxErr != nil {
+				trxErr = fmt.Errorf("trading - ClosePosition - GetAccountID: %w", trxErr)
+				return trxErr
+			}
+
+			trxErr = t.paymentService.IncreaseAmount(ctx, accountID, sum)
+			if trxErr != nil {
+				trxErr = fmt.Errorf("trading - ClosePosition - IncreaseAmount: %w", trxErr)
+				return trxErr
+			}
+		} else {
+			sum = pos.Amount * (price.SellingPrice - pos.ShortPosition)
+
+			var accountID string
+			accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
+			if trxErr != nil {
+				trxErr = fmt.Errorf("trading - ClosePosition - GetAccountID: %w", trxErr)
+				return trxErr
+			}
+
+			trxErr = t.paymentService.DecreaseAmount(ctx, accountID, sum)
+			if trxErr != nil {
+				trxErr = fmt.Errorf("trading - ClosePosition - DecreaseAmount: %w", trxErr)
+				return trxErr
+			}
 		}
 		return nil
 	})
@@ -226,52 +251,54 @@ func getPricesListener(ctx context.Context, t *Trading, errChan chan error) {
 	}
 }
 
-func getNotificationListener(ctx context.Context, t *Trading, errChan chan error) {
+func getPositionListener(ctx context.Context, t *Trading, errChan chan error) {
 	for {
 		select {
 		case <-ctx.Done():
 		default:
 			notify, err := t.positionsRepository.GetNotification(ctx)
 			if err != nil {
-				errChan <- fmt.Errorf("trading - getNotificationListener - GetNotification: %w", err)
+				errChan <- fmt.Errorf("trading - getPositionListener - GetPosition: %w", err)
 				continue
 			}
 
 			switch notify.Type {
 			case takeProfit:
-				if notify.Closed != 0 {
-					err = t.listenersRepository.RemoveListenerTP(notify)
-					if err != nil {
-						errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerTP: %w", err)
-						continue
-					}
-				}
 				err = t.listenersRepository.CreateListenerTP(ctx, notify)
 				if err != nil {
-					errChan <- fmt.Errorf("trading - getNotificationListener - CreateListenerTP: %w", err)
+					errChan <- fmt.Errorf("trading - getPositionListener - CreateListenerTP: %w", err)
 					continue
 				}
 				err = t.priceService.UpdateSubscription([]string{notify.Name})
 				if err != nil {
-					errChan <- fmt.Errorf("trading - getNotificationListener - UpdateSubscription: %w", err)
+					errChan <- fmt.Errorf("trading - getPositionListener - UpdateSubscription: %w", err)
 				}
 			case stopLoss:
-				if notify.Closed != 0 {
-					err = t.listenersRepository.RemoveListenerSL(notify)
+				err = t.listenersRepository.CreateListenerSL(ctx, notify)
+				if err != nil {
+					errChan <- fmt.Errorf("trading - getPositionListener - CreateListenerSL: %w", err)
+					continue
+				}
+				err = t.priceService.UpdateSubscription([]string{notify.Name})
+				if err != nil {
+					errChan <- fmt.Errorf("trading - getPositionListener - UpdateSubscription: %w", err)
+				}
+			case closed:
+				if notify.TakeProfit > 0 {
+					err = t.listenersRepository.RemoveListenerTP(notify)
 					if err != nil {
-						errChan <- fmt.Errorf("trading - getNotificationListener - RemoveListenerSL: %w", err)
+						errChan <- fmt.Errorf("trading - getPositionListener - RemoveListenerTP: %w", err)
 						continue
 					}
 				}
-				err = t.listenersRepository.CreateListenerSL(ctx, notify)
-				if err != nil {
-					errChan <- fmt.Errorf("trading - getNotificationListener - CreateListenerSL: %w", err)
-					continue
+				if notify.StopLoss > 0 {
+					err = t.listenersRepository.RemoveListenerSL(notify)
+					if err != nil {
+						errChan <- fmt.Errorf("trading - getPositionListener - RemoveListenerSL: %w", err)
+						continue
+					}
 				}
-				err = t.priceService.UpdateSubscription([]string{notify.Name})
-				if err != nil {
-					errChan <- fmt.Errorf("trading - getNotificationListener - UpdateSubscription: %w", err)
-				}
+			case created:
 			}
 		}
 	}

@@ -10,8 +10,10 @@ import (
 func TestListenersRepository_CreateListener(t *testing.T) {
 	ctx := context.Background()
 	notify := &model.Notification{
-		ID:   "testID",
-		Name: "testName",
+		Position: &model.Position{
+			ID:   "testID",
+			Name: "testName",
+		},
 	}
 
 	err := testListenersRepository.CreateListenerSL(ctx, notify)
@@ -31,8 +33,10 @@ func TestListenersRepository_CreateListener(t *testing.T) {
 func TestListenersRepository_RemoveListener(t *testing.T) {
 	ctx := context.Background()
 	notify := &model.Notification{
-		ID:   "testID",
-		Name: "testName",
+		Position: &model.Position{
+			ID:   "testID",
+			Name: "testName",
+		},
 	}
 
 	err := testListenersRepository.CreateListenerSL(ctx, notify)
@@ -64,9 +68,12 @@ func TestListenersRepository_RemoveListener(t *testing.T) {
 func TestListenersRepository_SendPrices(t *testing.T) {
 	ctx := context.Background()
 	notify := &model.Notification{
-		ID:    "testID",
-		Name:  "testName",
-		Price: 100,
+		Position: &model.Position{
+			ID:         "testID",
+			Name:       "testName",
+			StopLoss:   100,
+			TakeProfit: 100,
+		},
 	}
 
 	err := testListenersRepository.CreateListenerSL(ctx, notify)

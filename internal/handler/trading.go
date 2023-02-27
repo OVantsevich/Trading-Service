@@ -39,15 +39,17 @@ func NewPrice(s TradingService) *Trading {
 // OpenPosition open new position
 func (t *Trading) OpenPosition(ctx context.Context, request *pr.OpenPositionRequest) (*pr.OpenPositionResponse, error) {
 	position, err := t.service.CreatePosition(ctx, &model.Position{
-		User:   request.UserID,
-		Name:   request.Name,
-		Amount: request.Amount,
+		User:          request.UserID,
+		Name:          request.Name,
+		Amount:        request.Amount,
+		ShortPosition: request.ShortPosition,
 	})
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"UserID": position.User,
-			"Name":   position.Name,
-			"Amount": position.Amount,
+			"UserID":        position.User,
+			"Name":          position.Name,
+			"Amount":        position.Amount,
+			"ShortPosition": position.ShortPosition,
 		}).Errorf("trading - OpenPosition - CreatePosition: %v", err)
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -125,6 +127,9 @@ func positionToGRPC(pos *model.Position) *pr.Position {
 	}
 	if pos.TakeProfit != 0 {
 		prPos.TakeProfit = &pos.TakeProfit
+	}
+	if pos.TakeProfit != 0 {
+		prPos.ShortPosition = &pos.ShortPosition
 	}
 	if !pos.Created.IsZero() {
 		createUnix := pos.Created.Unix()

@@ -16,6 +16,7 @@ message OpenPositionRequest{
   string userID = 1;
   string name = 2;
   double amount = 3;
+  double short_position = 4;
 }
 
 message OpenPositionResponse{
@@ -61,6 +62,7 @@ message Position{
   double amount = 3;
   optional double stop_loss = 4;
   optional double take_profit = 5;
-  optional int64 created = 6;
-  optional int64 closed = 7;
+  optional double short_position = 6;
+  optional int64 created = 7;
+  optional int64 closed = 8;
 }

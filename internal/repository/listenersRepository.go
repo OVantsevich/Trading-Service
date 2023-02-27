@@ -4,9 +4,8 @@ package repository
 import (
 	"context"
 	"fmt"
-	"sync"
-
 	"github.com/OVantsevich/Trading-Service/internal/model"
+	"sync"
 )
 
 // stopLoss stop loss
@@ -47,13 +46,13 @@ func (l *ListenersRepository) CreateListenerTP(ctx context.Context, notify *mode
 	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
-		return fmt.Errorf("testListenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
+		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
 	channel := make(chan *model.Price, 1)
 	sendNotify := *notify
 	sendNotify.Type = takeProfit
 	go listener(ctx, channel, l.closedPositions, &sendNotify, func(price *model.Price, notification *model.Notification) bool {
-		return price.SellingPrice >= notification.Price
+		return price.SellingPrice >= notification.TakeProfit == (0.0 == notification.ShortPosition)
 	})
 	l.listenersTP[notify.Name][notify.ID] = channel
 	l.mu.Unlock()
@@ -72,13 +71,13 @@ func (l *ListenersRepository) CreateListenerSL(ctx context.Context, notify *mode
 	_, ok = lis[notify.ID]
 	if ok {
 		l.mu.Unlock()
-		return fmt.Errorf("testListenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
+		return fmt.Errorf("listenersRepository - CreateListenerSL: listener with this name and positionID alredy exist")
 	}
 	channel := make(chan *model.Price, 1)
 	sendNotify := *notify
 	sendNotify.Type = stopLoss
 	go listener(ctx, channel, l.closedPositions, &sendNotify, func(price *model.Price, notification *model.Notification) bool {
-		return price.SellingPrice <= notification.Price
+		return price.SellingPrice <= notification.StopLoss == (0.0 == notification.ShortPosition)
 	})
 	l.listenersSL[notify.Name][notify.ID] = channel
 	l.mu.Unlock()
@@ -92,7 +91,7 @@ func (l *ListenersRepository) RemoveListenerTP(notify *model.Notification) error
 	channel, ok := lis[notify.ID]
 	if !ok {
 		l.mu.Unlock()
-		return fmt.Errorf("testListenersRepository - RemoveListenerTP: listener with this name and positionID does't exist")
+		return fmt.Errorf("listenersRepository - RemoveListenerTP: listener with this name and positionID does't exist")
 	}
 	close(channel)
 	delete(l.listenersTP[notify.Name], notify.ID)
@@ -107,7 +106,7 @@ func (l *ListenersRepository) RemoveListenerSL(notify *model.Notification) error
 	channel, ok := lis[notify.ID]
 	if !ok {
 		l.mu.Unlock()
-		return fmt.Errorf("testListenersRepository - RemoveListenerSL: listener with this name and positionID does't exist")
+		return fmt.Errorf("listenersRepository - RemoveListenerSL: listener with this name and positionID does't exist")
 	}
 	close(channel)
 	delete(l.listenersSL[notify.Name], notify.ID)
@@ -130,10 +129,10 @@ func (l *ListenersRepository) SendPrices(prices []*model.Price) {
 }
 
 // ClosePosition sync await for closed position from listeners
-func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notification, error) {
+func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Position, error) {
 	select {
 	case <-ctx.Done():
-		return nil, fmt.Errorf("testListenersRepository - ClosePosition: context canceld")
+		return nil, fmt.Errorf("listenersRepository - ClosePosition: context canceld")
 	case notify := <-l.closedPositions:
 		switch notify.Type {
 		case takeProfit:
@@ -141,7 +140,17 @@ func (l *ListenersRepository) ClosePosition(ctx context.Context) (*model.Notific
 		case stopLoss:
 			l.RemoveListenerSL(notify)
 		}
-		return notify, nil
+		return &model.Position{
+			ID:            notify.ID,
+			User:          notify.User,
+			Name:          notify.Name,
+			Amount:        notify.Amount,
+			Price:         notify.Price,
+			StopLoss:      notify.StopLoss,
+			TakeProfit:    notify.TakeProfit,
+			ShortPosition: notify.ShortPosition,
+			Closed:        notify.Closed,
+		}, nil
 	}
 }
 
