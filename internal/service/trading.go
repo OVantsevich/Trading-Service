@@ -63,10 +63,10 @@ type PaymentService interface {
 //
 //go:generate mockery --name=ListenersRepository --case=underscore --output=./mocks
 type ListenersRepository interface {
-	CreateListenerTP(ctx context.Context, notify *model.Position) error
-	CreateListenerSL(ctx context.Context, notify *model.Position) error
-	RemoveListenerTP(notify *model.Position) error
-	RemoveListenerSL(notify *model.Position) error
+	CreateListenerTP(ctx context.Context, notify *model.Notification) error
+	CreateListenerSL(ctx context.Context, notify *model.Notification) error
+	RemoveListenerTP(notify *model.Notification) error
+	RemoveListenerSL(notify *model.Notification) error
 
 	SendPrices(prices []*model.Price)
 	ClosePosition(ctx context.Context) (*model.Position, error)

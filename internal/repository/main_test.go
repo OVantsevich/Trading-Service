@@ -28,12 +28,14 @@ const (
 )
 
 var testListenersRepository *ListenersRepository
+var testPNLListenersRepository *PNLListenersRepository
 var testPositionRepository *Position
 
 func TestMain(m *testing.M) {
 	testListenersRepository = NewListenersRepository()
+	testPNLListenersRepository = NewPNLListenersRepository()
 
-	pool, err := dockertest.NewPool(testLocalDockerUbuntu)
+	pool, err := dockertest.NewPool(testLocalDockerWindows)
 	if err != nil {
 		logrus.Fatalf("Could not construct pool: %s", err)
 	}
@@ -53,7 +55,7 @@ func TestMain(m *testing.M) {
 			fmt.Sprintf("POSTGRES_DB=%s", testPostgresDB),
 			"listen_addresses = '*'",
 		},
-		Mounts: []string{fmt.Sprintf("%s/migrations:/docker-entrypoint-initdb.d", testMigrationPassUbuntu)},
+		Mounts: []string{fmt.Sprintf("%s/migrations:/docker-entrypoint-initdb.d", testMigrationPassWindows)},
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"5432/tcp": {{HostIP: testPostgresHost, HostPort: fmt.Sprintf("%s/tcp", testPostgresPort)}},
 		},
