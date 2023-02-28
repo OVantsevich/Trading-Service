@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestPNLListenersRepository_AddPositions(t *testing.T) {
@@ -16,7 +17,8 @@ func TestPNLListenersRepository_AddPositions(t *testing.T) {
 		User:          uuid.NewString(),
 		Name:          uuid.NewString(),
 		Amount:        100,
-		ShortPosition: 10,
+		PurchasePrice: 10.0,
+		ShortPosition: true,
 	}
 	price := &model.Price{
 		Name:          position.Name,
@@ -28,7 +30,7 @@ func TestPNLListenersRepository_AddPositions(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestPNLListenersRepository_Send_Remove_Close(t *testing.T) {
+func TestPNLListenersRepository_Send_Close(t *testing.T) {
 	ctx := context.Background()
 	position := make([]*model.Position, 10)
 	price := make(map[string]*model.Price)
@@ -41,11 +43,12 @@ func TestPNLListenersRepository_Send_Remove_Close(t *testing.T) {
 			User:          user,
 			Name:          uuid.NewString(),
 			Amount:        100,
-			ShortPosition: rand.Float64() * 100,
+			PurchasePrice: rand.Float64() * 100,
+			ShortPosition: true,
 		}
 		price[position[i].Name] = &model.Price{
 			Name:          position[i].Name,
-			SellingPrice:  position[i].ShortPosition - position[i].ShortPosition/2,
+			SellingPrice:  position[i].PurchasePrice - position[i].PurchasePrice/2,
 			PurchasePrice: 0,
 		}
 	}
@@ -57,10 +60,23 @@ func TestPNLListenersRepository_Send_Remove_Close(t *testing.T) {
 		price[p.Name].SellingPrice *= 3
 	}
 
-	testPNLListenersRepository.SendPricesPNL(price)
+	priceSlice := make([]*model.Price, len(price))
+	j := 0
+	for _, p := range price {
+		priceSlice[j] = p
+		j++
+	}
+	testPNLListenersRepository.SendPricesPNL(priceSlice)
 
 	for _ = range price {
 		_, err := testPNLListenersRepository.ClosePosition(ctx)
 		require.NoError(t, err)
 	}
+	cancelContext, cancel := context.WithCancel(ctx)
+	go func() {
+		time.Sleep(time.Second * 2)
+		cancel()
+	}()
+	_, err = testPNLListenersRepository.ClosePosition(cancelContext)
+	require.Error(t, err)
 }

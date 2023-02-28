@@ -8,9 +8,6 @@ import (
 	"github.com/OVantsevich/Trading-Service/internal/model"
 )
 
-// created position created
-const created = "created"
-
 type newPosition struct {
 	newPos       *model.Position
 	currentPrice *model.Price
@@ -52,7 +49,7 @@ func (l *PNLListenersRepository) createListener(ctx context.Context, positions [
 
 	var ok bool
 	for _, n := range positions {
-		if n.ShortPosition != 0.0 {
+		if n.ShortPosition {
 			_, ok = l.listenersPrices[n.Name]
 			if !ok {
 				l.listenersPrices[n.Name] = make(map[string]chan *model.Price)
@@ -64,7 +61,7 @@ func (l *PNLListenersRepository) createListener(ctx context.Context, positions [
 	go pnlListener(ctx, l.userListeners[positions[0].User], l.pnlDown)
 
 	for _, p := range positions {
-		if p.ShortPosition != 0.0 {
+		if p.ShortPosition {
 			pos := *p
 			price := *prices[pos.Name]
 			l.userListeners[positions[0].User].addPosition <- &newPosition{
@@ -87,7 +84,7 @@ func (l *PNLListenersRepository) AddPositions(ctx context.Context, positions []*
 		}
 	} else {
 		for _, p := range positions {
-			if p.ShortPosition != 0.0 {
+			if p.ShortPosition {
 				_, ok = l.listenersPrices[p.Name]
 				if !ok {
 					l.listenersPrices[p.Name] = make(map[string]chan *model.Price)
@@ -109,37 +106,40 @@ func (l *PNLListenersRepository) AddPositions(ctx context.Context, positions []*
 
 // RemovePosition remove position
 func (l *PNLListenersRepository) RemovePosition(position *model.Position) error {
-	l.mu.Lock()
-	_, ok := l.userListeners[position.User]
-	if !ok {
-		return fmt.Errorf("PNLListenersRepository - RemPosition: listener for this user does not exist")
-	} else {
-		_, ok = l.listenersPrices[position.Name]
+	if position.ShortPosition {
+		l.mu.Lock()
+		_, ok := l.userListeners[position.User]
 		if !ok {
-			return fmt.Errorf("PNLListenersRepository - RemPosition: no pisition for this name exists")
+			return fmt.Errorf("PNLListenersRepository - RemovePosition: listener for this user does not exist")
+		} else {
+			_, ok = l.listenersPrices[position.Name]
+			if !ok {
+				return fmt.Errorf("PNLListenersRepository - RemovePosition: no position for this name exists")
+			}
+			_, ok = l.listenersPrices[position.Name][position.User]
+			if ok {
+				delete(l.listenersPrices[position.Name], position.User)
+			}
+			l.userListeners[position.User].removePosition <- position
 		}
-		_, ok = l.listenersPrices[position.Name][position.User]
-		if ok {
-			delete(l.listenersPrices[position.Name], position.User)
-		}
-		l.userListeners[position.User].removePosition <- position
+		l.mu.Unlock()
 	}
-	l.mu.Unlock()
 	return nil
 }
 
 // SendPricesPNL sending prices for all users listeners
-func (l *PNLListenersRepository) SendPricesPNL(prices map[string]*model.Price) {
+func (l *PNLListenersRepository) SendPricesPNL(prices []*model.Price) {
 	l.mu.RLock()
 	for _, p := range prices {
 		for _, lis := range l.listenersPrices[p.Name] {
-			go func(c chan *model.Price, inp *model.Price) {
-				c <- inp
-			}(lis, &model.Price{
-				Name:          p.Name,
-				SellingPrice:  p.SellingPrice,
-				PurchasePrice: p.PurchasePrice,
-			})
+			//go func(c chan *model.Price, inp *model.Price) {
+			//	c <- inp
+			//}(lis, &model.Price{
+			//	Name:          p.Name,
+			//	SellingPrice:  p.SellingPrice,
+			//	PurchasePrice: p.PurchasePrice,
+			//})
+			lis <- &(*p)
 		}
 	}
 	l.mu.RUnlock()
@@ -151,10 +151,6 @@ func (l *PNLListenersRepository) ClosePosition(ctx context.Context) (*model.Posi
 	case <-ctx.Done():
 		return nil, fmt.Errorf("PNLListenersRepository - ClosePosition: context canceld")
 	case position := <-l.pnlDown:
-		_, ok := l.listenersPrices[position.Name][position.User]
-		if ok {
-			delete(l.listenersPrices[position.Name], position.User)
-		}
 		return position, nil
 	}
 }
@@ -181,6 +177,8 @@ func pnlListener(ctx context.Context, userLis *userListener, cout chan *model.Po
 			if ok {
 				price.SellingPrice = updPrices.SellingPrice
 				price.PurchasePrice = updPrices.PurchasePrice
+			} else {
+				continue
 			}
 			for {
 				sum = recalculate(positions, prices)
@@ -233,8 +231,8 @@ func pnlListener(ctx context.Context, userLis *userListener, cout chan *model.Po
 func recalculate(positions map[string]*model.Position, prices map[string]*model.Price) float64 {
 	var sum float64
 	for _, pos := range positions {
-		if pos.ShortPosition != 0.0 {
-			sum += pos.Amount * (pos.ShortPosition - prices[pos.Name].SellingPrice)
+		if pos.ShortPosition {
+			sum += pos.Amount * (pos.PurchasePrice - prices[pos.Name].SellingPrice)
 		}
 	}
 	return sum

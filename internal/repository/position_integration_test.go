@@ -41,14 +41,14 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 		require.Error(t, err)
 
 		var closed *model.Position
-		closed, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		closed, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), 0.0, time.Now())
 		require.NoError(t, err)
 		require.Equal(t, closed.Amount, p.Amount)
 
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), 0.0, time.Now())
 		require.Error(t, err)
 
 		p.ID = uuid.New().String()
@@ -57,7 +57,7 @@ func TestPosition_Create_Close_Position(t *testing.T) {
 		_, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), 0.0, time.Now())
 		require.NoError(t, err)
 
 		_, err = testPositionRepository.GetNotification(ctx)
@@ -96,7 +96,7 @@ func TestPosition_GetPositionByID(t *testing.T) {
 		_, err = testPositionRepository.GetPositionByID(ctx, wrongPos.ID)
 		require.Error(t, err)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Add(time.Second).Unix(), 0.0, time.Now())
 		require.NoError(t, err)
 
 		_, err = testPositionRepository.GetNotification(ctx)
@@ -131,7 +131,7 @@ func TestPosition_GetUserPositions(t *testing.T) {
 	require.Equal(t, len(testData), len(getById))
 
 	for _, p := range testData {
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), 0.0, time.Now())
 		require.NoError(t, err)
 
 		_, err = testPositionRepository.GetNotification(ctx)
@@ -171,7 +171,7 @@ func TestPosition_SL_TP_GetPosition(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, (*model.Notification)(nil), res)
 
-		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), time.Now())
+		_, err = testPositionRepository.ClosePosition(ctx, p.ID, time.Now().Unix(), 0.0, time.Now())
 		require.NoError(t, err)
 		res, err = testPositionRepository.GetNotification(ctx)
 		require.NoError(t, err)

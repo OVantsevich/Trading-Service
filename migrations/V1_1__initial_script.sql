@@ -6,9 +6,11 @@ create table if not exists positions
     "user"         varchar(200)                                  not null,
     "name"         varchar(50)                                   not null,
     amount         double precision                              not null,
+    purchase_price double precision default 0                    not null,
+    selling_price  double precision default 0                    not null,
     stop_loss      double precision default 0                    not null,
     take_profit    double precision default 0                    not null,
-    short_position double precision default 0                    not null,
+    short_position boolean          default false                not null,
     closed         bigint           default 0                    not null,
     created        timestamp(6)     default CURRENT_TIMESTAMP(6) not null,
     updated        timestamp(6)     default CURRENT_TIMESTAMP(6) not null
@@ -26,17 +28,19 @@ DECLARE
     payload jsonb;
 BEGIN
     payload = jsonb_build_object(
-            'id', to_jsonb(OLD.id),
-            'name', to_jsonb(OLD.name),
-            'user', to_jsonb(OLD.user),
-            'short_position', to_jsonb(OLD.short_position),
+            'id', to_jsonb(NEW.id),
+            'name', to_jsonb(NEW.name),
+            'user', to_jsonb(NEW.user),
+            'purchase_price', to_jsonb(NEW.purchase_price),
+            'selling_price', to_jsonb(NEW.selling_price),
+            'short_position', to_jsonb(NEW.short_position),
             'type', to_jsonb(TG_NAME)
         );
     IF TG_NAME = 'stop_loss' THEN
-        payload = jsonb_set(payload, '{stop_loss}', to_jsonb(OLD.stop_loss), true);
+        payload = jsonb_set(payload, '{stop_loss}', to_jsonb(NEW.stop_loss), true);
     END IF;
     IF TG_NAME = 'take_profit' THEN
-        payload = jsonb_set(payload, '{take_profit}', to_jsonb(OLD.take_profit), true);
+        payload = jsonb_set(payload, '{take_profit}', to_jsonb(NEW.take_profit), true);
     END IF;
     IF TG_NAME = 'closed' THEN
         payload = jsonb_set(payload, '{closed}', to_jsonb(NEW.closed), true);

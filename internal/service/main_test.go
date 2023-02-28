@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/OVantsevich/Trading-Service/internal/repository"
 	"os"
 	"testing"
 
@@ -27,13 +28,12 @@ const (
 	testPostgresPassword = "postgres"
 )
 
-var testListenersRepository *ListenersRepository
-var testPositionRepository *Position
+var testTradingService *Trading
+var testPositionRepository PositionsRepository
+var testPool *pgxpool.Pool
 
 func TestMain(m *testing.M) {
-	testListenersRepository = NewListenersRepository()
-
-	pool, err := dockertest.NewPool(testLocalDockerWindows)
+	pool, err := dockertest.NewPool(testLocalDockerUbuntu)
 	if err != nil {
 		logrus.Fatalf("Could not construct pool: %s", err)
 	}
@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 			fmt.Sprintf("POSTGRES_DB=%s", testPostgresDB),
 			"listen_addresses = '*'",
 		},
-		Mounts: []string{fmt.Sprintf("%s/migrations:/docker-entrypoint-initdb.d", testMigrationPassWindows)},
+		Mounts: []string{fmt.Sprintf("%s/migrations:/docker-entrypoint-initdb.d", testMigrationPassUbuntu)},
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"5432/tcp": {{HostIP: testPostgresHost, HostPort: fmt.Sprintf("%s/tcp", testPostgresPort)}},
 		},
@@ -69,16 +69,18 @@ func TestMain(m *testing.M) {
 	}
 
 	ctx := context.Background()
+	var repos *repository.Position
 	if err = pool.Retry(func() error {
-		pgPool, retryErr := pgxpool.New(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s", testPostgresUser, testPostgresPassword, testPostgresHost, testPostgresPort, testPostgresDB))
+		var retryErr error
+		testPool, retryErr = pgxpool.New(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s", testPostgresUser, testPostgresPassword, testPostgresHost, testPostgresPort, testPostgresDB))
 		if retryErr != nil {
 			return fmt.Errorf("could not connect to db %s", retryErr)
 		}
-		retryErr = pgPool.Ping(ctx)
+		retryErr = testPool.Ping(ctx)
 		if retryErr != nil {
 			return retryErr
 		}
-		testPositionRepository, retryErr = NewPositionRepository(ctx, NewPgxWithinTransactionRunner(pgPool))
+		repos, retryErr = repository.NewPositionRepository(ctx, repository.NewPgxWithinTransactionRunner(testPool))
 		if retryErr != nil {
 			return retryErr
 		}
@@ -86,6 +88,7 @@ func TestMain(m *testing.M) {
 	}); err != nil {
 		logrus.Fatalf("Could not connect to postgres: %s", err)
 	}
+	testPositionRepository = repos
 
 	code := m.Run()
 

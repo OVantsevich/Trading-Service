@@ -3,14 +3,14 @@ module github.com/OVantsevich/Trading-Service
 go 1.19
 
 require (
-	github.com/OVantsevich/Payment-Service v0.0.0-20230224075859-462ddef7936e
-	github.com/OVantsevich/Price-Service v0.0.2-0.20230223083933-96be799743b9
+	github.com/OVantsevich/Payment-Service v0.0.0-20230228052510-039f0a17d508
+	github.com/OVantsevich/Price-Service v0.0.2-0.20230228052534-9c2620c2b331
 	github.com/caarlos0/env/v7 v7.0.0
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -41,7 +41,7 @@ require (
 	github.com/opencontainers/runc v1.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
