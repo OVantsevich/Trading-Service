@@ -63,8 +63,9 @@ func main() {
 	paymentService := repository.NewPaymentServiceRepository(pasClient)
 
 	listenerRepository := repository.NewListenersRepository()
+	pnlListener := repository.NewPNLListenersRepository()
 
-	tradingService := service.NewTrading(ctx, listenerRepository, positionRepository, priceService, paymentService, repository.NewPgxTransactor(pool))
+	tradingService := service.NewTrading(ctx, listenerRepository, pnlListener, positionRepository, priceService, paymentService, repository.NewPgxTransactor(pool))
 	tradingServer := handler.NewPrice(tradingService)
 
 	ns := grpc.NewServer()

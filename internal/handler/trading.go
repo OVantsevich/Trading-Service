@@ -121,24 +121,47 @@ func (t *Trading) TakeProfit(ctx context.Context, request *pr.TakeProfitRequest)
 }
 
 func positionToGRPC(pos *model.Position) *pr.Position {
-	prPos := &pr.Position{}
+	prPos := &pr.Position{
+		Id:            pos.ID,
+		Name:          pos.Name,
+		Amount:        pos.Amount,
+		Closed:        pos.Closed,
+		ShortPosition: pos.ShortPosition,
+		SellingPrice:  pos.SellingPrice,
+		PurchasePrice: pos.PurchasePrice,
+	}
 	if pos.StopLoss != 0 {
 		prPos.StopLoss = &pos.StopLoss
 	}
 	if pos.TakeProfit != 0 {
 		prPos.TakeProfit = &pos.TakeProfit
 	}
-	if pos.TakeProfit != 0 {
-		prPos.ShortPosition = &pos.ShortPosition
-	}
 	if !pos.Created.IsZero() {
 		createUnix := pos.Created.Unix()
 		prPos.Created = &createUnix
 	}
-	return &pr.Position{
-		Id:     pos.ID,
-		Name:   pos.Name,
-		Amount: pos.Amount,
-		Closed: &pos.Closed,
+	return prPos
+}
+
+func positionFromGRPC(pos *pr.Position) *model.Position {
+	modelPos := &model.Position{
+		ID:            pos.Id,
+		Name:          pos.Name,
+		Amount:        pos.Amount,
+		Closed:        pos.Closed,
+		ShortPosition: pos.ShortPosition,
+		SellingPrice:  pos.SellingPrice,
+		PurchasePrice: pos.PurchasePrice,
 	}
+	if pos.StopLoss != nil {
+		modelPos.StopLoss = *pos.StopLoss
+	}
+	if pos.TakeProfit != nil {
+		modelPos.TakeProfit = *pos.TakeProfit
+	}
+	if pos.Created != nil {
+		created := time.Unix(*pos.Created, 0)
+		modelPos.Created = created
+	}
+	return modelPos
 }
