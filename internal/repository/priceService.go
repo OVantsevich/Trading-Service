@@ -30,7 +30,7 @@ func NewPriceServiceRepository(ctx context.Context, pspp psProto.PriceServiceCli
 func (ps *PriceService) subscribe() (err error) {
 	ps.stream, err = ps.client.GetPrices(ps.ctx)
 	if err != nil {
-		return fmt.Errorf("priceService - Sebscribe - GetPrices: %e", err)
+		return fmt.Errorf("priceService - subscribe - GetPrices: %w", err)
 	}
 	return
 }
@@ -49,7 +49,7 @@ func (ps *PriceService) GetCurrentPrices(ctx context.Context, names []string) (m
 func (ps *PriceService) GetPrices() ([]*model.Price, error) {
 	response, err := ps.stream.Recv()
 	if err != nil {
-		return nil, fmt.Errorf("priceService - GetPrices - Recv: %e", err)
+		return nil, fmt.Errorf("priceService - GetPrices - Recv: %w", err)
 	}
 	return fromGRPC(response.Prices), nil
 }
@@ -58,7 +58,7 @@ func (ps *PriceService) GetPrices() ([]*model.Price, error) {
 func (ps *PriceService) UpdateSubscription(names []string) error {
 	err := ps.stream.Send(&psProto.GetPricesRequest{Names: names})
 	if err != nil {
-		return fmt.Errorf("priceService - UpdateSubscription - Send: %e", err)
+		return fmt.Errorf("priceService - UpdateSubscription - Send: %w", err)
 	}
 	return nil
 }

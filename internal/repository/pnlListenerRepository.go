@@ -80,7 +80,7 @@ func (l *PNLListenersRepository) AddPositions(ctx context.Context, positions []*
 	if !ok {
 		err := l.createListener(ctx, positions, prices)
 		if err != nil {
-			return fmt.Errorf("PNLListenersRepository - AddPositions - createListener: %e", err)
+			return fmt.Errorf("PNLListenersRepository - AddPositions - createListener: %w", err)
 		}
 	} else {
 		for _, p := range positions {

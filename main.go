@@ -29,7 +29,7 @@ func main() {
 
 	listen, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", cfg.Port))
 	if err != nil {
-		defer logrus.Fatalf("error while listening port: %e", err)
+		defer logrus.Fatalf("error while listening port: %v", err)
 	}
 
 	pool, err := dbConnection(cfg)
@@ -72,7 +72,7 @@ func main() {
 	pr.RegisterTradingServiceServer(ns, tradingServer)
 
 	if err = ns.Serve(listen); err != nil {
-		defer logrus.Fatalf("error while listening server: %e", err)
+		defer logrus.Fatalf("error while listening server: %v", err)
 	}
 }
 
