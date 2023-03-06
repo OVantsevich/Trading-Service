@@ -23,6 +23,5 @@ WORKDIR /app
 
 COPY --from=builder /app/main /app/main
 
-EXPOSE 12345
 
 CMD ["/app/main"]
