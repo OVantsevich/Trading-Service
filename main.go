@@ -27,7 +27,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	listen, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", cfg.Port))
+	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%s", cfg.Host, cfg.Port))
 	if err != nil {
 		defer logrus.Fatalf("error while listening port: %v", err)
 	}

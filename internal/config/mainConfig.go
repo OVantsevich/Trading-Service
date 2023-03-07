@@ -15,6 +15,7 @@ type MainConfig struct {
 	PostgresUser     string `env:"POSTGRES_USER,notEmpty" envDefault:"postgres"`
 	PostgresDB       string `env:"POSTGRES_DB,notEmpty" envDefault:"postgres"`
 	Port             string `env:"PORT,notEmpty" envDefault:"5000"`
+	Host             string `env:"HOST,notEmpty" envDefault:"localhost"`
 
 	PriceServicePort string `env:"PRICE_SERVICE_PORT,notEmpty" envDefault:"4000"`
 	PriceServiceHost string `env:"PRICE_SERVICE_HOST,notEmpty" envDefault:"localhost"`
