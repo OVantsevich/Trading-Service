@@ -55,7 +55,7 @@ func (p *Position) GetPositionByID(ctx context.Context, positionID string) (*mod
 									from positions where id = $1`, positionID)
 	err := row.Scan(&pos.ID, &pos.User, &pos.Name, &pos.Amount, &pos.StopLoss, &pos.TakeProfit, &pos.PurchasePrice, &pos.SellingPrice, &pos.ShortPosition, &pos.Updated, &pos.Created, &pos.Closed)
 	if err != nil {
-		return nil, fmt.Errorf("position - GetPositionByLogin - Scan: %w", err)
+		return nil, fmt.Errorf("position - GetPositionByID - Scan: %w", err)
 	}
 
 	return pos, nil

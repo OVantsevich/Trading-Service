@@ -118,7 +118,6 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 		}
 		price := response[position.Name]
 
-		sum := position.Amount * price.PurchasePrice
 		var accountID string
 		accountID, trxErr = t.paymentService.GetAccountID(ctx, position.User)
 		if trxErr != nil {
@@ -126,6 +125,8 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 			return trxErr
 		}
 
+		position.PurchasePrice = price.PurchasePrice
+		sum := position.Amount * price.PurchasePrice
 		trxErr = t.paymentService.DecreaseAmount(ctx, accountID, sum)
 		if trxErr != nil {
 			trxErr = fmt.Errorf("trading - CreatePosition - DecreaseAmount: %w", trxErr)
@@ -133,11 +134,8 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return pos, nil
+	return pos, err
 }
 
 // GetPositionByID get position by id
@@ -197,8 +195,6 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 
 		var sum float64
 		if !pos.ShortPosition {
-			sum = pos.Amount * price.SellingPrice
-
 			var accountID string
 			accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
 			if trxErr != nil {
@@ -206,6 +202,7 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 				return trxErr
 			}
 
+			sum = pos.Amount * price.SellingPrice
 			trxErr = t.paymentService.IncreaseAmount(ctx, accountID, sum)
 			if trxErr != nil {
 				trxErr = fmt.Errorf("trading - ClosePosition - IncreaseAmount: %w", trxErr)
@@ -213,7 +210,7 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 			}
 		} else {
 			if pos.PurchasePrice >= price.SellingPrice {
-				sum = pos.Amount * (pos.PurchasePrice - price.SellingPrice)
+				sum = pos.Amount * (pos.PurchasePrice + pos.PurchasePrice - price.SellingPrice)
 
 				var accountID string
 				accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
@@ -228,7 +225,7 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 					return trxErr
 				}
 			} else {
-				sum = pos.Amount * (price.SellingPrice - pos.PurchasePrice)
+				sum = pos.Amount * pos.PurchasePrice
 
 				var accountID string
 				accountID, trxErr = t.paymentService.GetAccountID(ctx, pos.User)
@@ -236,6 +233,14 @@ func (t *Trading) ClosePosition(ctx context.Context, positionID string, closed i
 					trxErr = fmt.Errorf("trading - ClosePosition - GetAccountID: %w", trxErr)
 					return trxErr
 				}
+
+				trxErr = t.paymentService.IncreaseAmount(ctx, accountID, sum)
+				if trxErr != nil {
+					trxErr = fmt.Errorf("trading - ClosePosition - IncreaseAmount: %w", trxErr)
+					return trxErr
+				}
+
+				sum = pos.Amount * (price.SellingPrice - pos.PurchasePrice)
 
 				trxErr = t.paymentService.DecreaseAmount(ctx, accountID, sum)
 				if trxErr != nil {

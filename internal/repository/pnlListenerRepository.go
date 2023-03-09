@@ -232,7 +232,7 @@ func recalculate(positions map[string]*model.Position, prices map[string]*model.
 	var sum float64
 	for _, pos := range positions {
 		if pos.ShortPosition {
-			sum += pos.Amount * (pos.PurchasePrice - prices[pos.Name].SellingPrice)
+			sum += pos.Amount * (pos.PurchasePrice + pos.PurchasePrice - prices[pos.Name].SellingPrice)
 		}
 	}
 	return sum
