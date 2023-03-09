@@ -46,10 +46,10 @@ func (t *Trading) OpenPosition(ctx context.Context, request *pr.OpenPositionRequ
 	})
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"UserID":        position.User,
-			"Name":          position.Name,
-			"Amount":        position.Amount,
-			"ShortPosition": position.ShortPosition,
+			"UserID":        request.UserID,
+			"Name":          request.Name,
+			"Amount":        request.Amount,
+			"ShortPosition": request.ShortPosition,
 		}).Errorf("trading - OpenPosition - CreatePosition: %v", err)
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
