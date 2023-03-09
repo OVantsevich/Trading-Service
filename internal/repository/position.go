@@ -2,7 +2,6 @@
 package repository
 
 import (
-	"container/list"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -70,7 +69,7 @@ func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*mode
 		return nil, fmt.Errorf("position - GetUserPositions - Query: %w", err)
 	}
 
-	var poss list.List
+	var result []*model.Position
 	for rows.Next() {
 		pos := &model.Position{
 			User: userID,
@@ -79,13 +78,7 @@ func (p *Position) GetUserPositions(ctx context.Context, userID string) ([]*mode
 		if err != nil {
 			return nil, fmt.Errorf("position - GetUserPositions - Scan: %w", err)
 		}
-		poss.PushBack(pos)
-	}
-	result := make([]*model.Position, poss.Len())
-	i := 0
-	for e := poss.Back(); e != nil; e = e.Prev() {
-		result[i] = e.Value.(*model.Position)
-		i++
+		result = append(result, pos)
 	}
 
 	return result, nil
