@@ -105,11 +105,6 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 	var pos *model.Position
 	err := t.transactor.WithinTransaction(ctx, func(ctx context.Context) error {
 		var trxErr error
-		position.ID = uuid.New().String()
-		pos, trxErr = t.positionsRepository.CreatePosition(ctx, position)
-		if trxErr != nil {
-			return fmt.Errorf("trading - CreatePosition - CreatePosition: %w", trxErr)
-		}
 
 		var response map[string]*model.Price
 		response, trxErr = t.priceService.GetCurrentPrices(ctx, []string{position.Name})
@@ -118,6 +113,13 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 		}
 		price := response[position.Name]
 
+		position.PurchasePrice = price.PurchasePrice
+		position.ID = uuid.New().String()
+		pos, trxErr = t.positionsRepository.CreatePosition(ctx, position)
+		if trxErr != nil {
+			return fmt.Errorf("trading - CreatePosition - CreatePosition: %w", trxErr)
+		}
+
 		var accountID string
 		accountID, trxErr = t.paymentService.GetAccountID(ctx, position.User)
 		if trxErr != nil {
@@ -125,7 +127,6 @@ func (t *Trading) CreatePosition(ctx context.Context, position *model.Position) 
 			return trxErr
 		}
 
-		position.PurchasePrice = price.PurchasePrice
 		sum := position.Amount * price.PurchasePrice
 		trxErr = t.paymentService.DecreaseAmount(ctx, accountID, sum)
 		if trxErr != nil {
